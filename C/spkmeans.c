@@ -26,6 +26,11 @@ double **multiply_matrices(double **matrix1, double **matrix2, int num_of_vector
 
 int sign(double x);
 
+double sortFunc(const void * a, const void * b);
+
+int eigengap_heuristic(double **jacobi_matrix, int num_of_vectors);
+
+
 //
 //void kmeans(int num_of_clusters, int num_of_iterations, int vector_dimension, int count, double vector_list[][vector_dimension], double eps, double init_centroids[][vector_dimension]);
 //
@@ -268,6 +273,7 @@ double **jacobi(double **matrix, int num_of_vectors) {
         if (check_convergence(matrix, previous_matrix, num_of_vectors, eps)) {
             break;
         }
+        previous_matrix = matrix; // need to reset prev matrix for next iteration
     }
     jacobi_matrix = (double **) malloc(num_of_vectors + 1 * sizeof(double *));
     for (i = 0; i < num_of_vectors + 1; i++) {
@@ -282,6 +288,29 @@ double **jacobi(double **matrix, int num_of_vectors) {
         }
     }
     return jacobi_matrix;
+}
+
+double sortFunc(const void * a, const void * b) {
+    return (*(double *)a - *(double *)b);
+}
+
+int eigengap_heuristic(double **jacobi_matrix, int num_of_vectors) {
+    double *eigenvalues;
+    int i;
+    double k;
+    k = 0;
+    eigenvalues = (double *)malloc(num_of_vectors + sizeof(double));
+    for (i = 0; i < num_of_vectors; i++) {
+        eigenvalues[i] = jacobi_matrix[0][i];
+    }
+    qsort(eigenvalues, num_of_vectors, sizeof(double), sortFunc);
+    for(i=1, i <= n/2, i++) {
+        if(fabs(eigenvalues[i] - eigenvalues[i-1]) > k) {
+            k = fabs(eigenvalues[i] - eigenvalues[i-1]);
+        }
+    }
+    return (int)k;
+
 }
 
 
