@@ -1,38 +1,135 @@
 #include "spkmeans.h"
 
-// TODO: user interface (both C and Python)
+// TODO: user interface in Python
 // TODO: C API
+// TODO: debug and test
+// TODO: makefile
 
 
-///* function declarations */
-double euclidean_distance(double *vector1, double *vector2, int max_d);
+int main(int argc, char **argv) {
+    double **returned_matrix;
+    double **returned_jacobi_matrix;
+    char *goal;
+    char *file_name;
+    int vector_dimension;
+    int vector_count;
+    char c;
+    double **vector_list;
+    int i;
+    int j;
+    FILE *file;
+    vector_dimension = 0;
+    vector_count = 0;
 
-double **wam(double **vectors, int num_of_vectors, int vector_dimension);
+    if (argc != 3) {
+        print_error();
+    }
+    goal = argv[1];
+    file_name = argv[2];
+    file = fopen(file_name, "r");
+    if (file == NULL) {
+        print_error();
+    }
+    while ((c = fgetc(file)) != EOF) {
+        if (c == '\n') {
+            vector_count++;
+        }
+    }
+    fseek(file, 0, SEEK_SET);
+    while ((c = fgetc(file)) != EOF) {
+        if (c == ',') {
+            vector_dimension++;
+        }
+        if (c == '\n') {
+            break;
+        }
+    }
+    vector_dimension++;
+    vector_list = calloc(vector_count, sizeof(double *));
+    if (vector_list == NULL) {
+        print_error();
+    }
+    for (i = 0; i < vector_count; i++) {
+        vector_list[i] = calloc(vector_dimension, sizeof(double));
+        if (vector_list[i] == NULL) {
+            print_error();
+        }
+    }
+    fseek(file, 0, SEEK_SET);
+    for (i = 0; i < vector_count; i++) {
+        for (j = 0; j < vector_dimension; j++) {
+            c = fgetc(file);
+            if (c != ',' && c != '\n') {
+                // if the character is not a comma or a new line, it is a number, therefore we need to go back one character
+                fseek(file, -1, SEEK_CUR);
+            }
+            fscanf(file, "%lf", &vector_list[i][j]);
+        }
+    }
+    fclose(file);
 
-double **ddg(double **wam_matrix, int num_of_vectors);
+    returned_matrix = calloc(vector_count, sizeof(double *));
+    if (returned_matrix == NULL) {
+        print_error();
+    }
+    for (i = 0; i < vector_count; i++) {
+        returned_matrix[i] = calloc(vector_dimension, sizeof(double));
+        if (returned_matrix[i] == NULL) {
+            print_error();
+        }
+    }
+    returned_jacobi_matrix = calloc(vector_count + 1, sizeof(double *));
+    if (returned_jacobi_matrix == NULL) {
+        print_error();
+    }
+    for (i = 0; i < vector_count + 1; i++) {
+        returned_jacobi_matrix[i] = calloc(vector_dimension, sizeof(double));
+        if (returned_jacobi_matrix[i] == NULL) {
+            print_error();
+        }
+    }
 
-double **gl(double **ddg_matrix, double **wam_matrix, int num_of_vectors);
 
-int *find_largest_absolute_value_coordinates(double **matrix, int num_of_vectors);
+    if (strcmp(goal, "wam") == 0) {
+        returned_matrix = wam(vector_list, vector_dimension, vector_count);
+    } else if (strcmp(goal, "ddg") == 0) {
+        returned_matrix = ddg(wam(vector_list, vector_dimension, vector_count), vector_count);
+    } else if (strcmp(goal, "gl") == 0) {
+        returned_matrix = gl(ddg(wam(vector_list, vector_dimension, vector_count), vector_count),
+                             wam(vector_list, vector_dimension, vector_count), vector_count);
+    } else if (strcmp(goal, "jacobi") == 0) {
+        returned_jacobi_matrix = jacobi(vector_list, vector_dimension);
+    } else {
+        print_error();
+    }
 
-double **calculate_rotation_matrix(double **mat, int num_of_vectors, int *coordinates);
+    if (strcmp(goal, "jacobi") == 0) {
+        for (i = 0; i < vector_count + 1; i++) {
+            for (j = 0; j < vector_dimension; j++) {
+                if (j == vector_dimension - 1)
+                    printf("%.4f\n", returned_jacobi_matrix[i][j]);
+                else
+                    printf("%.4f%c", returned_jacobi_matrix[i][j], ',');
+            }
+        }
+    } else {
+        for (i = 0; i < vector_count; i++) {
+            for (j = 0; j < vector_dimension; j++) {
+                if (j == vector_dimension - 1)
+                    printf("%.4f\n", returned_matrix[i][j]);
+                else
+                    printf("%.4f%c", returned_matrix[i][j], ',');
+            }
+        }
+    }
 
-int check_convergence(double **matrix, double **previous_matrix, int num_of_vectors, double eps);
+    return 0;
+}
 
-double **jacobi(double **matrix, int num_of_vectors);
-
-double **multiply_matrices(double **matrix1, double **matrix2, int num_of_vectors);
-
-int sign(double x);
-
-int sortFunc(const void *a, const void *b);
-
-int eigengap_heuristic(double **jacobi_matrix, int num_of_vectors);
-
-double **calculateUmatrix(double **jacobi_matrix, int num_of_vectors, int k);
-
-void kmeanspp(int num_of_clusters, int num_of_iterations, int vector_dimension, int count,
-              double vector_list[][vector_dimension], double eps, double init_centroids[][vector_dimension]);
+void print_error() {
+    printf("An error has occurred\n");
+    exit(1);
+}
 
 
 double euclidean_distance(double *vector1, double *vector2, int max_d) {
@@ -51,8 +148,14 @@ double **wam(double **vectors, int num_of_vectors, int vector_dimension) { // wa
     int i;
     int j;
     wam_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
+    if (wam_matrix == NULL) {
+        print_error();
+    }
     for (i = 0; i < num_of_vectors; i++) {
         wam_matrix[i] = (double *) malloc(num_of_vectors * sizeof(double));
+        if (wam_matrix[i] == NULL) {
+            print_error();
+        }
     }
     for (i = 0; i < num_of_vectors; i++) {
         for (j = 0; j < num_of_vectors; j++) {
@@ -73,8 +176,14 @@ double **ddg(double **wam_matrix, int num_of_vectors) {
     int j;
     double sum;
     ddg_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
+    if (ddg_matrix == NULL) {
+        print_error();
+    }
     for (i = 0; i < num_of_vectors; i++) {
         ddg_matrix[i] = (double *) malloc(num_of_vectors * sizeof(double));
+        if (ddg_matrix[i] == NULL) {
+            print_error();
+        }
     }
     for (i = 0; i < num_of_vectors; i++) {
         sum = 0;
@@ -91,8 +200,14 @@ double **gl(double **ddg_matrix, double **wam_matrix, int num_of_vectors) { // g
     int i;
     int j;
     gl_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
+    if (gl_matrix == NULL) {
+        print_error();
+    }
     for (i = 0; i < num_of_vectors; i++) {
         gl_matrix[i] = (double *) malloc(num_of_vectors * sizeof(double));
+        if (gl_matrix[i] == NULL) {
+            print_error();
+        }
     }
     for (i = 0; i < num_of_vectors; i++) {
         for (j = 0; j < num_of_vectors; j++) {
@@ -110,6 +225,9 @@ int *find_largest_absolute_value_coordinates(double **matrix, int num_of_vectors
     double max;
     max = 0;
     coordinates = (int *) malloc(2 * sizeof(int));
+    if (coordinates == NULL) {
+        print_error();
+    }
     for (i = 0; i < num_of_vectors; i++) {
         for (j = 0; j < num_of_vectors; j++) {
             if (i >= j) {
@@ -145,6 +263,15 @@ double **calculate_rotation_matrix(double **mat, int num_of_vectors, int *coordi
     double s;
     double theta;
     rotation_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
+    if (rotation_matrix == NULL) {
+        print_error();
+    }
+    for (i = 0; i < num_of_vectors; i++) {
+        rotation_matrix[i] = (double *) malloc(num_of_vectors * sizeof(double));
+        if (rotation_matrix[i] == NULL) {
+            print_error();
+        }
+    }
     aii = mat[coordinates[0]][coordinates[0]];
     ajj = mat[coordinates[1]][coordinates[1]];
     aij = mat[coordinates[0]][coordinates[1]];
@@ -153,7 +280,6 @@ double **calculate_rotation_matrix(double **mat, int num_of_vectors, int *coordi
     c = 1 / sqrt(1 + pow(t, 2));
     s = c * t;
     for (i = 0; i < num_of_vectors; i++) {
-        rotation_matrix[i] = (double *) malloc(num_of_vectors * sizeof(double));
         for (j = 0; j < num_of_vectors; j++) {
             if (i == j) {
                 rotation_matrix[i][j] = 1;
@@ -200,8 +326,14 @@ double **multiply_matrices(double **matrix1, double **matrix2, int num_of_vector
     int j;
     int k;
     result_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
+    if (result_matrix == NULL) {
+        print_error();
+    }
     for (i = 0; i < num_of_vectors; i++) {
         result_matrix[i] = (double *) malloc(num_of_vectors * sizeof(double));
+        if (result_matrix[i] == NULL) {
+            print_error();
+        }
     }
     for (i = 0; i < num_of_vectors; i++) {
         for (j = 0; j < num_of_vectors; j++) {
@@ -230,20 +362,47 @@ double **jacobi(double **original_matrix, int num_of_vectors) {
     int k;
     int *coordinates;
     matrix = (double **) malloc(num_of_vectors * sizeof(double *));
+    if (matrix == NULL) {
+        print_error();
+    }
     for (i = 0; i < num_of_vectors; i++) {
         matrix[i] = (double *) malloc(num_of_vectors * sizeof(double));
+        if (matrix[i] == NULL) {
+            print_error();
+        }
     }
     for (i = 0; i < num_of_vectors; i++) {
         for (j = 0; j < num_of_vectors; j++) {
             matrix[i][j] = original_matrix[i][j];
         }
     }
-    previous_matrix = matrix;
+    previous_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
+    if (previous_matrix == NULL) {
+        print_error();
+    }
+    for (i = 0; i < num_of_vectors; i++) {
+        previous_matrix[i] = (double *) malloc(num_of_vectors * sizeof(double));
+        if (previous_matrix[i] == NULL) {
+            print_error();
+        }
+    }
+    for (i = 0; i < num_of_vectors; i++) {
+        for (j = 0; j < num_of_vectors; j++) {
+            previous_matrix[i][j] = matrix[i][j];
+        }
+    }
+
     eps = 0.00001;
     num_of_iterations = 0;
     final_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
+    if (final_matrix == NULL) {
+        print_error();
+    }
     for (k = 0; k < num_of_vectors; k++) {
         final_matrix[k] = (double *) malloc(num_of_vectors * sizeof(double));
+        if (final_matrix[k] == NULL) {
+            print_error();
+        }
     }
     for (k = 0; k < num_of_vectors; k++) {
         final_matrix[k][k] = 1;
@@ -275,11 +434,22 @@ double **jacobi(double **original_matrix, int num_of_vectors) {
         if (check_convergence(matrix, previous_matrix, num_of_vectors, eps)) { // check convergence
             break;
         }
-        previous_matrix = matrix; // need to reset prev matrix for next iteration
+        // need to reset prev matrix for next iteration
+        for (i = 0; i < num_of_vectors; i++) {
+            for (j = 0; j < num_of_vectors; j++) {
+                previous_matrix[i][j] = matrix[i][j];
+            }
+        }
     }
     jacobi_matrix = (double **) malloc(num_of_vectors + 1 * sizeof(double *));
+    if (jacobi_matrix == NULL) {
+        print_error();
+    }
     for (i = 0; i < num_of_vectors + 1; i++) {
         jacobi_matrix[i] = (double *) malloc(num_of_vectors * sizeof(double));
+        if (jacobi_matrix[i] == NULL) {
+            print_error();
+        }
     }
     for (i = 0; i < num_of_vectors; i++) { // eigenvalues in first row
         jacobi_matrix[0][i] = matrix[i][i];
@@ -330,6 +500,9 @@ int eigengap_heuristic(double **jacobi_matrix, int num_of_vectors) { // calculat
     double k;
     k = 0;
     eigenvalues = (double *) malloc(num_of_vectors * sizeof(double));
+    if (eigenvalues == NULL) {
+        print_error();
+    }
     for (i = 0; i < num_of_vectors; i++) {
         eigenvalues[i] = jacobi_matrix[0][i];
     }
@@ -352,9 +525,18 @@ double **calculateUmatrix(double **jacobi_matrix, int num_of_vectors, int k) { /
     int j;
     int l;
     eigenvalues = (double *) malloc(num_of_vectors * sizeof(double));
+    if (eigenvalues == NULL) {
+        print_error();
+    }
     U = (double **) malloc(num_of_vectors * sizeof(double *));
+    if (U == NULL) {
+        print_error();
+    }
     for (i = 0; i < num_of_vectors; i++) {
         U[i] = (double *) malloc(k * sizeof(double));
+        if (U[i] == NULL) {
+            print_error();
+        }
     }
     for (i = 0; i < num_of_vectors; i++) {
         eigenvalues[i] = jacobi_matrix[0][i];
@@ -379,12 +561,12 @@ double **calculateUmatrix(double **jacobi_matrix, int num_of_vectors, int k) { /
 void kmeanspp(int num_of_clusters, int num_of_iterations, int vector_dimension, int count,
               double vector_list[][vector_dimension], double eps, double init_centroids[][vector_dimension]) {
 
-    double **centroids = calloc(num_of_clusters, sizeof(double *));
-    int *cluster_sizes_copy = calloc(num_of_clusters, sizeof(int));
-    double *temp_centroid = calloc(vector_dimension, sizeof(double));
-    int *cluster_sizes = calloc(num_of_clusters, sizeof(int));
-    double ***clusters = calloc(num_of_clusters, sizeof(double **));
-    double max_distance = -1;
+    double **centroids;
+    int *cluster_sizes_copy;
+    double *temp_centroid;
+    int *cluster_sizes;
+    double ***clusters;
+    double max_distance;
     int min_index1;
     int min_index2;
     int i;
@@ -401,9 +583,33 @@ void kmeanspp(int num_of_clusters, int num_of_iterations, int vector_dimension, 
     double distance2;
     double sum;
 
+    max_distance = -1;
+    centroids = calloc(num_of_clusters, sizeof(double *));
+    if (centroids == NULL) {
+        print_error();
+    }
+    cluster_sizes_copy = calloc(num_of_clusters, sizeof(int));
+    if (cluster_sizes_copy == NULL) {
+        print_error();
+    }
+    temp_centroid = calloc(vector_dimension, sizeof(double));
+    if (temp_centroid == NULL) {
+        print_error();
+    }
+    cluster_sizes = calloc(num_of_clusters, sizeof(int));
+    if (cluster_sizes == NULL) {
+        print_error();
+    }
+    clusters = calloc(num_of_clusters, sizeof(double **));
+    if (clusters == NULL) {
+        print_error();
+    }
 
     for (i = 0; i < num_of_clusters; i++) {
         centroids[i] = calloc(vector_dimension, sizeof(double));
+        if (centroids[i] == NULL) {
+            print_error();
+        }
     }
     for (i = 0; i < num_of_clusters; i++) {
         for (j = 0; j < vector_dimension; j++) {
@@ -429,8 +635,14 @@ void kmeanspp(int num_of_clusters, int num_of_iterations, int vector_dimension, 
         }
         for (j = 0; j < num_of_clusters; j++) {
             clusters[j] = calloc(cluster_sizes[j], sizeof(double *));
+            if (clusters[j] == NULL) {
+                print_error();
+            }
             for (m = 0; m < cluster_sizes[j]; m++) {
                 clusters[j][m] = calloc(vector_dimension, sizeof(double));
+                if (clusters[j][m] == NULL) {
+                    print_error();
+                }
             }
         }
         for (j = 0; j < count; j++) {
@@ -504,13 +716,6 @@ void kmeanspp(int num_of_clusters, int num_of_iterations, int vector_dimension, 
     free(clusters);
     free(cluster_sizes_copy);
 }
-
-
-int main() {
-    printf("Hello, World!");
-    return 0;
-}
-
 
 
 
