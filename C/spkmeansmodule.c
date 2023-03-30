@@ -1,6 +1,4 @@
 #include "spkmeans.h"
-#define PY_SSIZE_T_CLEAN
-#include <Python.h>
 
 static PyObject* wam(PyObject *self, PyObject *args) {
     double **pyObj_vectors;
