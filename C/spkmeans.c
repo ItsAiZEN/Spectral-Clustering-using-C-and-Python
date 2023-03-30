@@ -195,6 +195,7 @@ double **ddg(double **wam_matrix, int num_of_vectors) {
     return ddg_matrix;
 }
 
+
 double **gl(double **ddg_matrix, double **wam_matrix, int num_of_vectors) { // gl = graph laplacian (ddg - wam)
     double **gl_matrix;
     int i;

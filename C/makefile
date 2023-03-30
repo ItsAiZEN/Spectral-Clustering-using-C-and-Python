@@ -5,4 +5,5 @@ spkmeans: spkmeans.o spkmeans.h
 spkmeans.o: spkmeans.c
 	gcc -ansi -Wall -Wextra -Werror -pedantic-errors -c -spkmeans.c -lm
 
-# add clean up function ?
+clean:
+	rm -f *.o
