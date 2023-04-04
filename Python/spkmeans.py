@@ -6,38 +6,26 @@ import mykmeanssp
 
 np.random.seed(0)
 
-if len(sys.argv) == 6:
-    file1 = open(sys.argv[4], "r")
-    file2 = open(sys.argv[5], "r")
-    iter = int(sys.argv[2])
-    epsilon = float(sys.argv[3])
-
-elif len(sys.argv) == 5:
-    file1 = open(sys.argv[3], "r")
-    file2 = open(sys.argv[4], "r")
-    iter = 300
-    epsilon = float(sys.argv[2])
+if len(sys.argv) == 3:
+    goal = sys.argv[1]
+    file = open(sys.argv[2], "r")
+    # k denoted from eigengap
+elif len(sys.argv) == 4:
+    k = int(sys.argv[1])
+    goal = sys.argv[2]
+    file = open(sys.argv[3], "r")
 else:
     print("An Error Has Occurred")
     exit()
 
-k = int(sys.argv[1])
-
-f1 = pd.read_csv(file1, header=None)
-f2 = pd.read_csv(file2, header=None)
-vectors = pd.merge(f1, f2, on=0)
-vector_dimension = f1.shape[1]
-vectors.sort_values(by=[vectors.columns[0]], inplace=True)
-
+vectors = pd.read_csv(file, header=None)
+vector_dimension = vectors.shape[1]
 N = vectors.shape[0]
 
-if k >= N or k <= 1:
-    print("Invalid number of clusters!")
-    exit()
-
-if iter <= 1 or iter >= 1000:
-    print("Invalid maximum iteration!")
-    exit()
+if len(sys.argv) == 4:
+    if k >= N or k <= 1:
+        print("Invalid number of clusters!")
+        exit()
 
 
 def euclidean_distance(vector1, vector2):
@@ -45,6 +33,45 @@ def euclidean_distance(vector1, vector2):
     for i in range(len(vector1)):
         total_sum += (vector1[i] - vector2[i]) ** 2
     return math.sqrt(total_sum)
+
+
+if goal == "wam":
+    wam = mykmeanssp.wam(vectors, N, vector_dimension)
+    size = len(wam)
+    # print the wam matrix, seperate by commas and output with 4 decimal places
+    for i in range(size):
+        for j in range(size):
+            print('%.4f' % wam[i][j], end="")
+            if j != vector_dimension - 1:
+                print(",", end="")
+        print()
+
+elif goal == "ddg":
+    ddg = mykmeanssp.ddg(mykmeanssp(vectors, N, vector_dimension), len(vectors))
+    size = len(ddg)
+    # print the ddg matrix, seperate by commas and output with 4 decimal places
+    for i in range(size):
+        for j in range(size):
+            print('%.4f' % ddg[i][j], end="")
+            if j != vector_dimension - 1:
+                print(",", end="")
+        print()
+
+elif goal == "gl":
+    wam = mykmeanssp.wam(vectors, N, vector_dimension)
+    ddg = mykmeanssp.ddg(mykmeanssp(vectors, N, vector_dimension), len(vectors))
+    gl = mykmeanssp.gl(wam, ddg, len(wam))
+    size = len(gl)
+    # print the gl matrix, seperate by commas and output with 4 decimal places
+    for i in range(size):
+        for j in range(size):
+            print('%.4f' % gl[i][j], end="")
+            if j != vector_dimension - 1:
+                print(",", end="")
+        print()
+
+elif goal == "jacobi":
+    # NEXT TIME CONTINUE HERE
 
 
 def kmeans_pp(vectors, k, iter, epsilon):
