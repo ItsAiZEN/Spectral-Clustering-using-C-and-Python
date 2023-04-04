@@ -66,3 +66,6 @@ C/cmake-build-debug/CMakeFiles/3.25.2/CMakeCCompiler.cmake
 C/cmake-build-debug/.cmake/api/v1/reply/index-2023-04-04T16-43-24-0639.json
 C/cmake-build-debug/.cmake/api/v1/reply/cmakeFiles-v1-f78719ae8fb26a335ecb.json
 C/cmake-build-debug/.cmake/api/v1/reply/cache-v2-b8ac61be3b424dd2faf4.json
+Python/mykmeanssp.cpython-39-darwin.so
+Python/build/temp.macosx-10.9-universal2-cpython-39/spkmeansmodule.o
+Python/build/lib.macosx-10.9-universal2-cpython-39/mykmeanssp.cpython-39-darwin.so

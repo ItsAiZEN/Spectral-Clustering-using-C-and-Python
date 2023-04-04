@@ -1,4 +1,3 @@
-#include <Python.h>
 #include "spkmeans.h"
 
 static PyObject *wam1(PyObject *self, PyObject *args) {
@@ -555,43 +554,43 @@ static PyMethodDef kmeanssp_methods[] = {
         {
                 "wam", // name exposed to Python
                 wam1, // C wrapper function
-                      METH_VARARGS, // received variable args (but really just 1)
+                METH_VARARGS, // received variable args (but really just 1)
                 "Returns the wam matrix" // documentation
         },
         {
                 "ddg", // name exposed to Python
                 ddg1, // C wrapper function
-                      METH_VARARGS, // received variable args (but really just 1)
+                METH_VARARGS, // received variable args (but really just 1)
                 "Returns the ddg matrix" // documentation
         },
         {
                 "gl", // name exposed to Python
                 gl1, // C wrapper function
-                      METH_VARARGS, // received variable args (but really just 1)
+                METH_VARARGS, // received variable args (but really just 1)
                 "Returns the gl matrix" // documentation
         },
         {
                 "jacobi", // name exposed to Python
                 jacobi1, // C wrapper function
-                      METH_VARARGS, // received variable args (but really just 1)
+                METH_VARARGS, // received variable args (but really just 1)
                 "Returns the jacobi matrix" // documentation
         },
         {
                 "spk", // name exposed to Python
                 spk, // C wrapper function
-                      METH_VARARGS, // received variable args (but really just 1)
+                METH_VARARGS, // received variable args (but really just 1)
                 "performs spkmeans (kmeanspp with specific values)" // documentation
         },
         {
                 "eigengap_heuristic", // name exposed to Python
                 eigengap_heuristic1, // C wrapper function
-                      METH_VARARGS, // received variable args (but really just 1)
+                METH_VARARGS, // received variable args (but really just 1)
                 "Returns relevant k" // documentation
         },
         {
                 "calculateUmatrix", // name exposed to Python
                 calculateUmatrix1, // C wrapper function
-                      METH_VARARGS, // received variable args (but really just 1)
+                METH_VARARGS, // received variable args (but really just 1)
                 "Returns the U matrix" // documentation
         },
         { NULL, NULL, 0, NULL }
