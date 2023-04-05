@@ -1,7 +1,6 @@
 #include "spkmeans.h"
 
-// TODO: user interface in Python
-// TODO: C API
+// TODO: check in memory allocation for missing (), like there was in line 457
 // TODO: debug and test
 // TODO: makefile
 
