@@ -35,45 +35,6 @@ def euclidean_distance(vector1, vector2):
     return math.sqrt(total_sum)
 
 
-if goal == "wam":
-    wam = mykmeanssp.wam(vectors, N, vector_dimension)
-    size = len(wam)
-    # print the wam matrix, seperate by commas and output with 4 decimal places
-    for i in range(size):
-        for j in range(size):
-            print('%.4f' % wam[i][j], end="")
-            if j != vector_dimension - 1:
-                print(",", end="")
-        print()
-
-elif goal == "ddg":
-    ddg = mykmeanssp.ddg(mykmeanssp(vectors, N, vector_dimension), len(vectors))
-    size = len(ddg)
-    # print the ddg matrix, seperate by commas and output with 4 decimal places
-    for i in range(size):
-        for j in range(size):
-            print('%.4f' % ddg[i][j], end="")
-            if j != vector_dimension - 1:
-                print(",", end="")
-        print()
-
-elif goal == "gl":
-    wam = mykmeanssp.wam(vectors, N, vector_dimension)
-    ddg = mykmeanssp.ddg(mykmeanssp(vectors, N, vector_dimension), len(vectors))
-    gl = mykmeanssp.gl(wam, ddg, len(wam))
-    size = len(gl)
-    # print the gl matrix, seperate by commas and output with 4 decimal places
-    for i in range(size):
-        for j in range(size):
-            print('%.4f' % gl[i][j], end="")
-            if j != vector_dimension - 1:
-                print(",", end="")
-        print()
-
-elif goal == "jacobi":
-    # NEXT TIME CONTINUE HERE
-
-
 def kmeans_pp(vectors, k, iter, epsilon):
     original_vec_list = np.array(vectors)
     keys = [vector for vector in vectors[0]]
@@ -108,8 +69,69 @@ def kmeans_pp(vectors, k, iter, epsilon):
         for j in range(original_vec_list.shape[1] - 1):
             final_vec_list_inner.append(original_vec_list[i, j + 1])
         final_vec_list.append(final_vec_list_inner)
-    mykmeanssp.fit(k, iter, original_vec_list.shape[1] - 1, original_vec_list.shape[0], final_vec_list, epsilon,
-                   centroids)
+    mykmeanssp.spk(k, original_vec_list.shape[0], final_vec_list, centroids)
 
 
-kmeans_pp(vectors, k, iter, epsilon)
+if goal == "wam":
+    wam = mykmeanssp.wam(vectors, N, vector_dimension)
+    size = len(wam)
+    # print the wam matrix, seperate by commas and output with 4 decimal places
+    for i in range(size):
+        for j in range(size):
+            print('%.4f' % wam[i][j], end="")
+            if j != vector_dimension - 1:
+                print(",", end="")
+        print()
+
+elif goal == "ddg":
+    wam = mykmeanssp.wam(vectors, N, vector_dimension)
+    ddg = mykmeanssp.ddg(wam, len(wam))
+    size = len(ddg)
+    # print the ddg matrix, seperate by commas and output with 4 decimal places
+    for i in range(size):
+        for j in range(size):
+            print('%.4f' % ddg[i][j], end="")
+            if j != vector_dimension - 1:
+                print(",", end="")
+        print()
+
+elif goal == "gl":
+    wam = mykmeanssp.wam(vectors, N, vector_dimension)
+    ddg = mykmeanssp.ddg(wam, len(wam))
+    gl = mykmeanssp.gl(wam, ddg, len(wam))
+    size = len(gl)
+    # print the gl matrix, seperate by commas and output with 4 decimal places
+    for i in range(size):
+        for j in range(size):
+            print('%.4f' % gl[i][j], end="")
+            if j != vector_dimension - 1:
+                print(",", end="")
+        print()
+
+elif goal == "jacobi":
+    # NEXT TIME CONTINUE HERE
+    wam = mykmeanssp.wam(vectors, N, vector_dimension)
+    ddg = mykmeanssp.ddg(wam, len(wam))
+    gl = mykmeanssp.gl(wam, ddg, len(wam))
+    jacobi = mykmeanssp.jacobi(gl, len(gl))
+    size = len(jacobi) - 1
+    # print the jacobi matrix, seperate by commas and output with 4 decimal places
+    for i in range(size + 1):
+        for j in range(size):
+            print('%.4f' % jacobi[i][j], end="")
+            if j != size:
+                print(",", end="")
+        print()
+
+
+elif goal == "spk":
+    wam = mykmeanssp.wam(vectors, N, vector_dimension)
+    ddg = mykmeanssp.ddg(wam, len(wam))
+    gl = mykmeanssp.gl(wam, ddg, len(wam))
+    jacobi = mykmeanssp.jacobi(gl, len(gl))
+    if len(sys.argv) == 3:
+        k = mykmeanssp.eigengap_heuristic(jacobi, len(jacobi))
+    u_matrix = mykmeanssp.calculateUmatrix(jacobi, len(jacobi), k)
+    kmeans_pp(u_matrix, k, 300, 0)
+
+file.close()
