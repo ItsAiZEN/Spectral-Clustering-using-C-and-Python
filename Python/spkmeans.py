@@ -24,7 +24,7 @@ N = vectors.shape[0]
 
 if len(sys.argv) == 4:
     if k >= N or k <= 1:
-        print("Invalid number of clusters!")
+        print("An Error Has Occurred")
         exit()
 
 

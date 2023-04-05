@@ -478,6 +478,15 @@ double **jacobi(double **original_matrix, int num_of_vectors) {
         free(previous_matrix[i]);
     }
     free(previous_matrix);
+    // check if any of the eigenvalues between -0.0000 to -0.0001, if so multiply by -1
+    for (i = 0; i < num_of_vectors; i++) {
+        if (jacobi_matrix[0][i] < 0 && jacobi_matrix[0][i] > -0.0001) {
+            jacobi_matrix[0][i] = 0;
+            for (j = 1; j < num_of_vectors + 1; j++) {
+                jacobi_matrix[j][i] = jacobi_matrix[j][i] * -1;
+            }
+        }
+    }
 
     return jacobi_matrix;
 }
