@@ -374,6 +374,10 @@ static PyObject *jacobi1(PyObject *self, PyObject *args) {
 static PyObject *spk(PyObject *self, PyObject *args) {
     int n;
     int k;
+    int i;
+    int j;
+    double **vector_list;
+    double **init_centroids;
     PyObject *pyObjVector_list;
     PyObject *pyObjInit_centroids;
     PyObject *item_row;
@@ -388,9 +392,16 @@ static PyObject *spk(PyObject *self, PyObject *args) {
     }
 
     // transform py list with vectors (from U) to C matrix
-    double vector_list[n][k];
-    int i;
-    int j;
+    vector_list = (double **) malloc(n * sizeof(double *));
+    if (vector_list == NULL) {
+        print_error();
+    }
+    for (i = 0; i < n; i++) {
+        vector_list[i] = (double *) malloc(k * sizeof(double));
+        if (vector_list[i] == NULL) {
+            print_error();
+        }
+    }
     for (i = 0; i < n; i++) {
         item_row = PyList_GetItem(pyObjVector_list, i);
         for (j = 0; j < k; j++) {
@@ -401,7 +412,16 @@ static PyObject *spk(PyObject *self, PyObject *args) {
     }
 
     // transform py list with init centroids to C matrix
-    double init_centroids[k][k];
+    init_centroids = (double **) malloc(k * sizeof(double *));
+    if (init_centroids == NULL) {
+        print_error();
+    }
+    for (i = 0; i < n; i++) {
+        init_centroids[i] = (double *) malloc(k * sizeof(double));
+        if (init_centroids[i] == NULL) {
+            print_error();
+        }
+    }
     for (i = 0; i < k; i++) {
         item_row = PyList_GetItem(pyObjInit_centroids, i);
         for (j = 0; j < k; j++) {
@@ -412,6 +432,16 @@ static PyObject *spk(PyObject *self, PyObject *args) {
     }
 
     kmeanspp(k, 300, k, n, vector_list, 0, init_centroids);
+
+    // free memory (vector_list + init_centroids)
+    for (i = 0; i < n; i++) {
+        free(vector_list[i]);
+    }
+    free(vector_list);
+    for (i = 0; i < k; i++) {
+        free(init_centroids[i]);
+    }
+    free(init_centroids);
 
     Py_RETURN_NONE;
 }
