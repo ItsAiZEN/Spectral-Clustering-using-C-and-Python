@@ -1,5 +1,6 @@
 #include "spkmeans.h"
 
+/* remember when calling a function that returns a matrix, don't allocate memory for returned alue outside of function: next up for memory checks = jacobi */
 
 int main(int argc, char **argv) {
     double **returned_matrix;
@@ -10,6 +11,8 @@ int main(int argc, char **argv) {
     int vector_count;
     char c;
     double **vector_list;
+    double **wam_returned;
+    double **ddg_returned;
     int i;
     int j;
     FILE *file;
@@ -88,10 +91,24 @@ int main(int argc, char **argv) {
     if (strcmp(goal, "wam") == 0) {
         returned_matrix = wam(vector_list, vector_count, vector_dimension);
     } else if (strcmp(goal, "ddg") == 0) {
-        returned_matrix = ddg(wam(vector_list, vector_count, vector_dimension), vector_count);
+        wam_returned = wam(vector_list, vector_count, vector_dimension);
+	returned_matrix = ddg(wam_returned, vector_count);
+	for (i = 0; i < vector_count; i++) {
+                free(wam_returned[i]);
+        }
+        free(wam_returned);
     } else if (strcmp(goal, "gl") == 0) {
-        returned_matrix = gl(ddg(wam(vector_list, vector_count, vector_dimension), vector_count),
-                             wam(vector_list, vector_count, vector_dimension), vector_count);
+        wam_returned = wam(vector_list, vector_count, vector_dimension);
+	ddg_returned = ddg(wam_returned, vector_count);
+	returned_matrix = gl(ddg_returned, wam_returned, vector_count);
+	for (i = 0; i < vector_count; i++) {
+                free(wam_returned[i]);
+        }
+        free(wam_returned);
+	for (i = 0; i < vector_count; i++) {
+                free(ddg_returned[i]);
+        }
+        free(ddg_returned);
     } else if (strcmp(goal, "jacobi") == 0) {
         returned_jacobi_matrix = jacobi(vector_list, vector_count);
     } else {
@@ -745,6 +762,5 @@ void kmeanspp(int num_of_clusters, int num_of_iterations, int vector_dimension, 
     free(clusters);
     free(cluster_sizes_copy);
 }
-
 
 
