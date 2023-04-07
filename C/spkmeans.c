@@ -1,6 +1,5 @@
 #include "spkmeans.h"
 
-// TODO: check in memory allocation for missing (), like there was in line 457
 // TODO: debug and test
 // TODO: makefile
 

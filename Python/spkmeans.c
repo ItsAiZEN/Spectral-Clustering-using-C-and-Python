@@ -1,7 +1,5 @@
 #include "spkmeans.h"
 
-// TODO: user interface in Python
-// TODO: C API
 // TODO: debug and test
 // TODO: makefile
 
@@ -67,13 +65,12 @@ int main(int argc, char **argv) {
         }
     }
     fclose(file);
-
     returned_matrix = calloc(vector_count, sizeof(double *));
     if (returned_matrix == NULL) {
         print_error();
     }
     for (i = 0; i < vector_count; i++) {
-        returned_matrix[i] = calloc(vector_dimension, sizeof(double));
+        returned_matrix[i] = calloc(vector_count, sizeof(double));
         if (returned_matrix[i] == NULL) {
             print_error();
         }
@@ -83,7 +80,7 @@ int main(int argc, char **argv) {
         print_error();
     }
     for (i = 0; i < vector_count + 1; i++) {
-        returned_jacobi_matrix[i] = calloc(vector_dimension, sizeof(double));
+        returned_jacobi_matrix[i] = calloc(vector_count, sizeof(double));
         if (returned_jacobi_matrix[i] == NULL) {
             print_error();
         }
@@ -91,22 +88,22 @@ int main(int argc, char **argv) {
 
 
     if (strcmp(goal, "wam") == 0) {
-        returned_matrix = wam(vector_list, vector_dimension, vector_count);
+        returned_matrix = wam(vector_list, vector_count, vector_dimension);
     } else if (strcmp(goal, "ddg") == 0) {
-        returned_matrix = ddg(wam(vector_list, vector_dimension, vector_count), vector_count);
+        returned_matrix = ddg(wam(vector_list, vector_count, vector_dimension), vector_count);
     } else if (strcmp(goal, "gl") == 0) {
-        returned_matrix = gl(ddg(wam(vector_list, vector_dimension, vector_count), vector_count),
-                             wam(vector_list, vector_dimension, vector_count), vector_count);
+        returned_matrix = gl(ddg(wam(vector_list, vector_count, vector_dimension), vector_count),
+                             wam(vector_list, vector_count, vector_dimension), vector_count);
     } else if (strcmp(goal, "jacobi") == 0) {
-        returned_jacobi_matrix = jacobi(vector_list, vector_dimension);
+        returned_jacobi_matrix = jacobi(vector_list, vector_count);
     } else {
         print_error();
     }
 
     if (strcmp(goal, "jacobi") == 0) {
         for (i = 0; i < vector_count + 1; i++) {
-            for (j = 0; j < vector_dimension; j++) {
-                if (j == vector_dimension - 1)
+            for (j = 0; j < vector_count; j++) {
+                if (j == vector_count - 1)
                     printf("%.4f\n", returned_jacobi_matrix[i][j]);
                 else
                     printf("%.4f%c", returned_jacobi_matrix[i][j], ',');
@@ -114,14 +111,28 @@ int main(int argc, char **argv) {
         }
     } else {
         for (i = 0; i < vector_count; i++) {
-            for (j = 0; j < vector_dimension; j++) {
-                if (j == vector_dimension - 1)
+            for (j = 0; j < vector_count; j++) {
+                if (j == vector_count - 1)
                     printf("%.4f\n", returned_matrix[i][j]);
                 else
                     printf("%.4f%c", returned_matrix[i][j], ',');
             }
         }
     }
+
+    // free memory
+    for (i = 0; i < vector_count; i++) {
+        free(vector_list[i]);
+    }
+    free(vector_list);
+    for (i = 0; i < vector_count; i++) {
+        free(returned_matrix[i]);
+    }
+    free(returned_matrix);
+    for (i = 0; i < vector_count + 1; i++) {
+        free(returned_jacobi_matrix[i]);
+    }
+    free(returned_jacobi_matrix);
 
     return 0;
 }
@@ -442,7 +453,7 @@ double **jacobi(double **original_matrix, int num_of_vectors) {
             }
         }
     }
-    jacobi_matrix = (double **) malloc(num_of_vectors + 1 * sizeof(double *));
+    jacobi_matrix = (double **) malloc((num_of_vectors + 1) * sizeof(double *));
     if (jacobi_matrix == NULL) {
         print_error();
     }
