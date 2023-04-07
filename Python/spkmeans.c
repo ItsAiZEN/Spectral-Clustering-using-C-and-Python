@@ -390,6 +390,7 @@ double **jacobi(double **original_matrix, int num_of_vectors) {
     double **rot_mat; /* P for each iteration*/
     double **final_matrix; /* the matrix that contains the eigenvectors as columns at the end of the iteration (multiplication of all P matrices)*/
     double **previous_matrix; /* "matrix" from the previous iteration (A)*/
+    double **mult_matrices;
     double eps;
     int num_of_iterations;
     double s;
@@ -466,7 +467,12 @@ double **jacobi(double **original_matrix, int num_of_vectors) {
         matrix[i][j] = (pow(c, 2) - pow(s, 2)) * previous_matrix[i][j] +
                        c * s * (previous_matrix[i][i] - previous_matrix[j][j]);
         matrix[j][i] = matrix[i][j];
-        final_matrix = multiply_matrices(final_matrix, rot_mat, num_of_vectors);
+        mult_matrices = multiply_matrices(final_matrix, rot_mat, num_of_vectors);
+        final_matrix = mult_matrices;
+        for (i = 0; i < num_of_vectors; i++) {
+            free(mult_matrices[i]);
+        }
+        free(mult_matrices);
         /* add current P to final matrix calculation*/
         if (check_convergence(matrix, previous_matrix, num_of_vectors, eps)) { /* check convergence*/
             break;
