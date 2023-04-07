@@ -390,7 +390,7 @@ double **jacobi(double **original_matrix, int num_of_vectors) {
     double **rot_mat; /* P for each iteration*/
     double **final_matrix; /* the matrix that contains the eigenvectors as columns at the end of the iteration (multiplication of all P matrices)*/
     double **previous_matrix; /* "matrix" from the previous iteration (A)*/
-    double **mult_matrices;
+    double **mul_matrices;
     double eps;
     int num_of_iterations;
     double s;
@@ -467,13 +467,18 @@ double **jacobi(double **original_matrix, int num_of_vectors) {
         matrix[i][j] = (pow(c, 2) - pow(s, 2)) * previous_matrix[i][j] +
                        c * s * (previous_matrix[i][i] - previous_matrix[j][j]);
         matrix[j][i] = matrix[i][j];
-        mult_matrices = multiply_matrices(final_matrix, rot_mat, num_of_vectors);
-        final_matrix = mult_matrices;
-        for (i = 0; i < num_of_vectors; i++) {
-            free(mult_matrices[i]);
-        }
-        free(mult_matrices);
         /* add current P to final matrix calculation*/
+        mul_matrices = multiply_matrices(final_matrix, rot_mat, num_of_vectors);
+        /*final_matrix = mul_matrices;*/
+        for (i = 0; i < num_of_vectors; i++) {
+            for (j = 0; j < num_of_vectors; j++) {
+                final_matrix[i][j] = mul_matrices[i][j];
+            }
+        }
+        for (i = 0; i < num_of_vectors; i++) {
+            free(mul_matrices[i]);
+        }
+        free(mul_matrices);
         if (check_convergence(matrix, previous_matrix, num_of_vectors, eps)) { /* check convergence*/
             break;
         }
@@ -487,6 +492,7 @@ double **jacobi(double **original_matrix, int num_of_vectors) {
             free(rot_mat[i]);
         }
         free(rot_mat);
+        free(coordinates);
     }
     jacobi_matrix = (double **) malloc((num_of_vectors + 1) * sizeof(double *));
     if (jacobi_matrix == NULL) {
