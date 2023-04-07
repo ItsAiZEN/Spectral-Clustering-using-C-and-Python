@@ -479,6 +479,11 @@ double **jacobi(double **original_matrix, int num_of_vectors) {
             free(mul_matrices[i]);
         }
         free(mul_matrices);
+        for (i = 0; i < num_of_vectors; i++) {
+            free(rot_mat[i]);
+        }
+        free(rot_mat);
+        free(coordinates);
         if (check_convergence(matrix, previous_matrix, num_of_vectors, eps)) { /* check convergence*/
             break;
         }
@@ -488,11 +493,6 @@ double **jacobi(double **original_matrix, int num_of_vectors) {
                 previous_matrix[i][j] = matrix[i][j];
             }
         }
-        for (i = 0; i < num_of_vectors; i++) {
-            free(rot_mat[i]);
-        }
-        free(rot_mat);
-        free(coordinates);
     }
     jacobi_matrix = (double **) malloc((num_of_vectors + 1) * sizeof(double *));
     if (jacobi_matrix == NULL) {
