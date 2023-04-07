@@ -15,7 +15,6 @@ static PyObject *wam1(PyObject *self, PyObject *args) {
     PyObject *py_wam_matrix;
     PyObject *py_wam_matrix_row;
     PyObject *return_val;
-    //test
 
     // check args are as expected
     if (!PyArg_ParseTuple(args, "Oii", &pyObj_vectors, &num_of_vectors, &vector_dimension)) {
