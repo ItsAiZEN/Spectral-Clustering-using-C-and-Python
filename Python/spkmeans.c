@@ -432,12 +432,12 @@ double **jacobi(double **original_matrix, int num_of_vectors) {
 
     eps = 0.00001;
     num_of_iterations = 0;
-    final_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
+    final_matrix = (double **) calloc(num_of_vectors, sizeof(double *));
     if (final_matrix == NULL) {
         print_error();
     }
     for (k = 0; k < num_of_vectors; k++) {
-        final_matrix[k] = (double *) malloc(num_of_vectors * sizeof(double));
+        final_matrix[k] = (double *) calloc(num_of_vectors, sizeof(double));
         if (final_matrix[k] == NULL) {
             print_error();
         }
