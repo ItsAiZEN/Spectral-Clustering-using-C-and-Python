@@ -38,16 +38,20 @@ def euclidean_distance(vector1, vector2):
     return math.sqrt(total_sum)
 
 
-def kmeans_pp(vectors, k, iter, epsilon):
-    original_vec_list = np.array(vectors)
-    keys = [vector for vector in vectors[0]]
+def kmeans_pp(u_matrix1, k_dimension):
+    # make u_matrix1 a pandas dataframe
+    u_matrix = pd.DataFrame(u_matrix1)
+    # add a left column of indices to the dataframe
+    u_matrix.insert(0, "index", range(0, len(u_matrix)))
+    original_vec_list = np.array(u_matrix)
+    keys = original_vec_list[:, 0]
     centroids = []
     chosen_index = np.random.choice(keys)
     chosen_vector = original_vec_list[np.where(original_vec_list[:, 0] == chosen_index)[0][0], :]
     centroids.append(chosen_vector[1:].tolist())
     choices_indices = []
     choices_indices.append(chosen_index)
-    for i in range(1, k):
+    for i in range(1, k_dimension):
         distances = []
         distances_sum = 0
         for vector in original_vec_list:
@@ -72,7 +76,7 @@ def kmeans_pp(vectors, k, iter, epsilon):
         for j in range(original_vec_list.shape[1] - 1):
             final_vec_list_inner.append(original_vec_list[i, j + 1])
         final_vec_list.append(final_vec_list_inner)
-    mykmeanssp.spk(k, original_vec_list.shape[0], final_vec_list, centroids)
+    mykmeanssp.spk(k_dimension, original_vec_list.shape[0], final_vec_list, centroids)
 
 
 if goal == "wam":
@@ -131,6 +135,7 @@ elif goal == "spk":
     if len(sys.argv) == 3:
         k = mykmeanssp.eigengap_heuristic(jacobi, len(jacobi)-1)
     u_matrix = mykmeanssp.calculateUmatrix(jacobi, len(jacobi)-1, k)
-    kmeans_pp(u_matrix, k, 300, 0)
+
+    kmeans_pp(u_matrix, k)
 
 file.close()

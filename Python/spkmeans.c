@@ -578,7 +578,7 @@ int eigengap_heuristic(double **jacobi_matrix, int num_of_vectors) { /* calculat
     }
     /* free memory*/
     free(eigenvalues);
-    return index;
+    return index + 1;
 }										
 
 double **calculateUmatrix(double **jacobi_matrix, int num_of_vectors, int k) { /* calculates the U matrix, returns
