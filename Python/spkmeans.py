@@ -4,6 +4,12 @@ import pandas as pd
 import numpy as np
 import mykmeanssp
 
+# TODO: either check memory of eigengap, calculateUmatrix and kmeanspp or move them to the c api.
+# TODO: make the code run on NOVA
+# TODO: make the code more elegant
+# TODO: final tests and documentation
+
+
 np.random.seed(0)
 
 if len(sys.argv) == 3:
@@ -133,8 +139,8 @@ elif goal == "spk":
     gl = mykmeanssp.gl(wam, ddg, len(wam))
     jacobi = mykmeanssp.jacobi(gl, len(gl))
     if len(sys.argv) == 3:
-        k = mykmeanssp.eigengap_heuristic(jacobi, len(jacobi)-1)
-    u_matrix = mykmeanssp.calculateUmatrix(jacobi, len(jacobi)-1, k)
+        k = mykmeanssp.eigengap_heuristic(jacobi, len(jacobi) - 1)
+    u_matrix = mykmeanssp.calculateUmatrix(jacobi, len(jacobi) - 1, k)
 
     kmeans_pp(u_matrix, k)
 

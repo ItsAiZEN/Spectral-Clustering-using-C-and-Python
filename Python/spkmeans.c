@@ -1,6 +1,6 @@
 #include "spkmeans.h"
 
-/* remember when calling a function that returns a matrix, don't allocate memory for returned alue outside of function: next up for memory checks = jacobi */
+/* remember when calling a function that returns a matrix, don't allocate memory for returned value outside of function*/
 
 int main(int argc, char **argv) {
     double **returned_matrix;
