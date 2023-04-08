@@ -30,6 +30,6 @@ int eigengap_heuristic(double **jacobi_matrix, int num_of_vectors);
 double **calculateUmatrix(double **jacobi_matrix, int num_of_vectors, int k);
 
 void kmeanspp(int num_of_clusters, int num_of_iterations, int vector_dimension, int count,
-              double vector_list[][vector_dimension], double eps, double init_centroids[][vector_dimension]);
+              double **vector_list, double eps, double **init_centroids);
 
 void print_error();
