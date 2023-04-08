@@ -560,6 +560,7 @@ int eigengap_heuristic(double **jacobi_matrix, int num_of_vectors) { /* calculat
     double *eigenvalues;
     int i;
     double k;
+    int index;
     k = 0;
     eigenvalues = (double *) malloc(num_of_vectors * sizeof(double));
     if (eigenvalues == NULL) {
@@ -569,14 +570,15 @@ int eigengap_heuristic(double **jacobi_matrix, int num_of_vectors) { /* calculat
         eigenvalues[i] = jacobi_matrix[0][i];
     }
     qsort(eigenvalues, num_of_vectors, sizeof(double), sortFunc);
-    for (i = 1; i <= num_of_vectors / 2; i++) {
-        if (fabs(eigenvalues[i] - eigenvalues[i - 1]) > k) {
-            k = fabs(eigenvalues[i] - eigenvalues[i - 1]);
+    for (i = 0; i < num_of_vectors / 2; i++) {
+        if (fabs(eigenvalues[i+1] - eigenvalues[i]) > k) {
+            k = fabs(eigenvalues[i+1] - eigenvalues[i]);
+            index = i;
         }
     }
     /* free memory*/
     free(eigenvalues);
-    return (int) k;
+    return index;
 }										
 
 double **calculateUmatrix(double **jacobi_matrix, int num_of_vectors, int k) { /* calculates the U matrix, returns
