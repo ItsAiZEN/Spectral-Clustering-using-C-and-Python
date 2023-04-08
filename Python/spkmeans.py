@@ -112,16 +112,13 @@ elif goal == "gl":
         print()
 
 elif goal == "jacobi":
-    wam = mykmeanssp.wam(vectors, N, vector_dimension)
-    ddg = mykmeanssp.ddg(wam, len(wam))
-    gl = mykmeanssp.gl(wam, ddg, len(wam))
-    jacobi = mykmeanssp.jacobi(gl, len(gl))
+    jacobi = mykmeanssp.jacobi(vectors, N)
     size = len(jacobi) - 1
     # print the jacobi matrix, seperate by commas and output with 4 decimal places
     for i in range(size + 1):
         for j in range(size):
             print('%.4f' % jacobi[i][j], end="")
-            if j != size:
+            if j != N - 1:
                 print(",", end="")
         print()
 
