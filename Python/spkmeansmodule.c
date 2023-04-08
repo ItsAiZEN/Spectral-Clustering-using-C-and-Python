@@ -45,18 +45,6 @@ static PyObject *wam1(PyObject *self, PyObject *args) {
         }
     }
 
-    // allocate memory for returned wam_matrix in C (for returned val of wam function)
-    Cwam_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
-    if (Cwam_matrix == NULL) {
-        print_error();
-    }
-    for (i = 0; i < num_of_vectors; i++) {
-        Cwam_matrix[i] = (double *) malloc(num_of_vectors * sizeof(double));
-        if (Cwam_matrix[i] == NULL) {
-            print_error();
-        }
-    }
-
     Cwam_matrix = wam(vector_list, num_of_vectors, vector_dimension);
 
     // create new python list (to return to python) and insert Cwam_matrix into the list
@@ -65,9 +53,9 @@ static PyObject *wam1(PyObject *self, PyObject *args) {
         print_error();
     }
     for (i = 0; i < num_of_vectors; i++) {
-        py_wam_matrix_row = PyList_New(vector_dimension);
+        py_wam_matrix_row = PyList_New(num_of_vectors);
         PyList_SetItem(py_wam_matrix, i, py_wam_matrix_row);
-        for (j = 0; j < vector_dimension; j++) {
+        for (j = 0; j < num_of_vectors; j++) {
             wam_num = PyFloat_FromDouble(Cwam_matrix[i][j]);
             PyList_SetItem(py_wam_matrix_row, j, wam_num);
         }
@@ -129,17 +117,6 @@ static PyObject *ddg1(PyObject *self, PyObject *args) {
         }
     }
 
-    // allocate memory for returned ddg_matrix in C (for returned val of ddg function)
-    Cddg_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
-    if (Cddg_matrix == NULL) {
-        print_error();
-    }
-    for (i = 0; i < num_of_vectors; i++) {
-        Cddg_matrix[i] = (double *) malloc(num_of_vectors * sizeof(double));
-        if (Cddg_matrix[i] == NULL) {
-            print_error();
-        }
-    }
 
     Cddg_matrix = ddg(C_wam_matrix, num_of_vectors);
 
@@ -197,8 +174,6 @@ static PyObject *gl1(PyObject *self, PyObject *args) {
         return NULL;
     }
 
-    // not finished. maybe we can use the pyObj functions for wam and ddg above instead of copying everything ?
-
     // transform input wam matrix (given as list in Python) to C so that we can use it as an argument in the C ddg function
     C_wam_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
     if (C_wam_matrix == NULL) {
@@ -239,23 +214,11 @@ static PyObject *gl1(PyObject *self, PyObject *args) {
         }
     }
 
-    // allocate memory for returned gl_matrix in C (for returned val of gl function)
-    C_gl_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
-    if (C_gl_matrix == NULL) {
-        print_error();
-    }
-    for (i = 0; i < num_of_vectors; i++) {
-        C_gl_matrix[i] = (double *) malloc(num_of_vectors * sizeof(double));
-        if (C_gl_matrix[i] == NULL) {
-            print_error();
-        }
-    }
-
     C_gl_matrix = gl(C_wam_matrix, C_ddg_matrix, num_of_vectors);
 
     // create new python list (to return to python) and insert C_gl_matrix into the list
-    py_gl_matrix = PyList_New(
-            num_of_vectors); // PyList_New returns a list of size num_of_vectors on success, and NULL on failure
+    py_gl_matrix = PyList_New(num_of_vectors);
+     // PyList_New returns a list of size num_of_vectors on success, and NULL on failure
     if (py_gl_matrix == NULL) {
         print_error();
     }
@@ -324,29 +287,17 @@ static PyObject *jacobi1(PyObject *self, PyObject *args) {
         }
     }
 
-    // allocate memory for returned gl_matrix in C (for returned val of gl function)
-    C_jacobi_matrix = (double **) malloc((num_of_vectors + 1) * sizeof(double *));
-    if (C_jacobi_matrix == NULL) {
-        print_error();
-    }
-    for (i = 0; i < (num_of_vectors + 1); i++) {
-        C_jacobi_matrix[i] = (double *) malloc(num_of_vectors * sizeof(double));
-        if (C_jacobi_matrix[i] == NULL) {
-            print_error();
-        }
-    }
-
     C_jacobi_matrix = jacobi(C_matrix, num_of_vectors);
 
     // create new python list (to return to python) and insert C_jacobi_matrix into the list
 
-    py_jacobi_matrix = PyList_New(
-            num_of_vectors); // PyList_New returns a list of size num_of_vectors on success, and NULL on failure
+    py_jacobi_matrix = PyList_New(num_of_vectors+1);
+     // PyList_New returns a list of size num_of_vectors on success, and NULL on failure
     if (py_jacobi_matrix == NULL) {
         print_error();
     }
 
-    for (i = 0; i < num_of_vectors; i++) {
+    for (i = 0; i < num_of_vectors + 1; i++) {
         py_jacobi_matrix_row = PyList_New(num_of_vectors);
         PyList_SetItem(py_jacobi_matrix, i, py_jacobi_matrix_row);
         for (j = 0; j < num_of_vectors; j++) {
@@ -534,18 +485,6 @@ static PyObject *calculateUmatrix1(PyObject *self, PyObject *args) {
             item_col = PyList_GetItem(item_row, j);
             num = PyFloat_AsDouble(item_col);
             C_jacobi_matrix[i][j] = num;
-        }
-    }
-
-    // allocate memory for returned C_U_matrix in C (for returned val of calcU function)
-    C_U_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
-    if (C_U_matrix == NULL) {
-        print_error();
-    }
-    for (i = 0; i < num_of_vectors; i++) {
-        C_U_matrix[i] = (double *) malloc(k * sizeof(double));
-        if (C_U_matrix[i] == NULL) {
-            print_error();
         }
     }
 

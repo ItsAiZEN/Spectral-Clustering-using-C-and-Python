@@ -18,9 +18,12 @@ else:
     print("An Error Has Occurred")
     exit()
 
-vectors = pd.read_csv(file, header=None)
-vector_dimension = vectors.shape[1]
-N = vectors.shape[0]
+vectors1 = pd.read_csv(file, header=None)
+vector_dimension = vectors1.shape[1]
+N = vectors1.shape[0]
+
+# transpose the matrix
+vectors = vectors1.values.tolist()
 
 if len(sys.argv) == 4:
     if k >= N or k <= 1:
@@ -79,7 +82,7 @@ if goal == "wam":
     for i in range(size):
         for j in range(size):
             print('%.4f' % wam[i][j], end="")
-            if j != vector_dimension - 1:
+            if j != N - 1:
                 print(",", end="")
         print()
 
@@ -91,7 +94,7 @@ elif goal == "ddg":
     for i in range(size):
         for j in range(size):
             print('%.4f' % ddg[i][j], end="")
-            if j != vector_dimension - 1:
+            if j != N - 1:
                 print(",", end="")
         print()
 
@@ -104,12 +107,11 @@ elif goal == "gl":
     for i in range(size):
         for j in range(size):
             print('%.4f' % gl[i][j], end="")
-            if j != vector_dimension - 1:
+            if j != N - 1:
                 print(",", end="")
         print()
 
 elif goal == "jacobi":
-    # NEXT TIME CONTINUE HERE
     wam = mykmeanssp.wam(vectors, N, vector_dimension)
     ddg = mykmeanssp.ddg(wam, len(wam))
     gl = mykmeanssp.gl(wam, ddg, len(wam))

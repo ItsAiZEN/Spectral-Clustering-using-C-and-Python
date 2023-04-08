@@ -69,3 +69,4 @@ C/cmake-build-debug/.cmake/api/v1/reply/cache-v2-b8ac61be3b424dd2faf4.json
 Python/mykmeanssp.cpython-39-darwin.so
 Python/build/temp.macosx-10.9-universal2-cpython-39/spkmeansmodule.o
 Python/build/lib.macosx-10.9-universal2-cpython-39/mykmeanssp.cpython-39-darwin.so
+Python/build/temp.macosx-10.9-universal2-cpython-39/spkmeans.o
