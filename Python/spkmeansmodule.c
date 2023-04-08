@@ -419,7 +419,7 @@ static PyObject *eigengap_heuristic1(PyObject *self, PyObject *args) {
     if (C_jacobi_matrix == NULL) {
         print_error();
     }
-    for (i = 0; i < num_of_vectors; i++) {
+    for (i = 0; i < num_of_vectors+1; i++) {
         C_jacobi_matrix[i] = (double *) malloc(num_of_vectors * sizeof(double));
         if (C_jacobi_matrix[i] == NULL) {
             print_error();
@@ -497,7 +497,7 @@ static PyObject *calculateUmatrix1(PyObject *self, PyObject *args) {
     }
 
     for (i = 0; i < num_of_vectors; i++) {
-        py_u_matrix_row = PyList_New(num_of_vectors);
+        py_u_matrix_row = PyList_New(k);
         PyList_SetItem(py_u_matrix, i, py_u_matrix_row);
         for (j = 0; j < k; j++) {
             u_num = PyFloat_FromDouble(C_U_matrix[i][j]);
