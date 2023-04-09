@@ -43,12 +43,12 @@ int main(int argc, char **argv) {
         }
     }
     vector_dimension++;
-    vector_list = (double**)malloc(vector_count * sizeof(double *));
+    vector_list = (double **) malloc(vector_count * sizeof(double *));
     if (vector_list == NULL) {
         print_error();
     }
     for (i = 0; i < vector_count; i++) {
-        vector_list[i] = (double *)malloc(vector_dimension* sizeof(double));
+        vector_list[i] = (double *) malloc(vector_dimension * sizeof(double));
         if (vector_list[i] == NULL) {
             print_error();
         }
@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
             c = fgetc(file);
             if (c != ',' && c != '\n') {
                 /* if the character is not a comma or a new line, it is a number, therefore we need to go back one character */
-            	fseek(file, -1, SEEK_CUR);
+                fseek(file, -1, SEEK_CUR);
             }
             fscanf(file, "%lf", &vector_list[i][j]);
         }
@@ -70,21 +70,21 @@ int main(int argc, char **argv) {
         returned_matrix = wam(vector_list, vector_count, vector_dimension);
     } else if (strcmp(goal, "ddg") == 0) {
         wam_returned = wam(vector_list, vector_count, vector_dimension);
-	returned_matrix = ddg(wam_returned, vector_count);
-	for (i = 0; i < vector_count; i++) {
-                free(wam_returned[i]);
+        returned_matrix = ddg(wam_returned, vector_count);
+        for (i = 0; i < vector_count; i++) {
+            free(wam_returned[i]);
         }
         free(wam_returned);
     } else if (strcmp(goal, "gl") == 0) {
         wam_returned = wam(vector_list, vector_count, vector_dimension);
-	ddg_returned = ddg(wam_returned, vector_count);
-	returned_matrix = gl(ddg_returned, wam_returned, vector_count);
-	for (i = 0; i < vector_count; i++) {
-                free(wam_returned[i]);
+        ddg_returned = ddg(wam_returned, vector_count);
+        returned_matrix = gl(ddg_returned, wam_returned, vector_count);
+        for (i = 0; i < vector_count; i++) {
+            free(wam_returned[i]);
         }
         free(wam_returned);
-	for (i = 0; i < vector_count; i++) {
-                free(ddg_returned[i]);
+        for (i = 0; i < vector_count; i++) {
+            free(ddg_returned[i]);
         }
         free(ddg_returned);
     } else if (strcmp(goal, "jacobi") == 0) {
@@ -102,10 +102,10 @@ int main(int argc, char **argv) {
                     printf("%.4f%c", returned_jacobi_matrix[i][j], ',');
             }
         }
-	for (i = 0; i < vector_count + 1; i++) {
-        	free(returned_jacobi_matrix[i]);
-    	}
-    	free(returned_jacobi_matrix);
+        for (i = 0; i < vector_count + 1; i++) {
+            free(returned_jacobi_matrix[i]);
+        }
+        free(returned_jacobi_matrix);
     } else {
         for (i = 0; i < vector_count; i++) {
             for (j = 0; j < vector_count; j++) {
@@ -115,10 +115,10 @@ int main(int argc, char **argv) {
                     printf("%.4f%c", returned_matrix[i][j], ',');
             }
         }
-	for (i = 0; i < vector_count; i++) {
-        	free(returned_matrix[i]);
-   	}	
-    	free(returned_matrix);
+        for (i = 0; i < vector_count; i++) {
+            free(returned_matrix[i]);
+        }
+        free(returned_matrix);
     }
 
     /*free memory*/
@@ -173,7 +173,7 @@ double **wam(double **vectors, int num_of_vectors, int vector_dimension) { /* wa
     return wam_matrix;
 }
 
-double **ddg(double **wam_matrix, int num_of_vectors) {	
+double **ddg(double **wam_matrix, int num_of_vectors) {
     /*ddg = degree diagonal matrix (diagonal matrix with the sum of each row as the diagonal elements)*/
     double **ddg_matrix;
     int i;
@@ -489,11 +489,11 @@ double **jacobi(double **original_matrix, int num_of_vectors) {
         free(final_matrix[i]);
     }
     free(final_matrix);
- /*   for (i = 0; i < num_of_vectors; i++) {
-        free(rot_mat[i]);
-    }
-    free(rot_mat);
-    free(coordinates); */
+    /*   for (i = 0; i < num_of_vectors; i++) {
+           free(rot_mat[i]);
+       }
+       free(rot_mat);
+       free(coordinates); */
     for (i = 0; i < num_of_vectors; i++) {
         free(previous_matrix[i]);
     }
@@ -539,15 +539,15 @@ int eigengap_heuristic(double **jacobi_matrix, int num_of_vectors) { /* calculat
     }
     qsort(eigenvalues, num_of_vectors, sizeof(double), sortFunc);
     for (i = 0; i < num_of_vectors / 2; i++) {
-        if (fabs(eigenvalues[i+1] - eigenvalues[i]) > k) {
-            k = fabs(eigenvalues[i+1] - eigenvalues[i]);
+        if (fabs(eigenvalues[i + 1] - eigenvalues[i]) > k) {
+            k = fabs(eigenvalues[i + 1] - eigenvalues[i]);
             index = i;
         }
     }
     /* free memory*/
     free(eigenvalues);
     return index + 1;
-}										
+}
 
 double **calculateUmatrix(double **jacobi_matrix, int num_of_vectors, int k) { /* calculates the U matrix, returns
      a matrix with k eigenvectors (with smallest eigenvalues) as its columns */

@@ -48,7 +48,8 @@ static PyObject *wam1(PyObject *self, PyObject *args) {
     Cwam_matrix = wam(vector_list, num_of_vectors, vector_dimension);
 
     // create new python list (to return to python) and insert Cwam_matrix into the list
-    py_wam_matrix = PyList_New(num_of_vectors); // PyList_New returns a list of size num_of_vectors on success, and NULL on failure
+    py_wam_matrix = PyList_New(
+            num_of_vectors); // PyList_New returns a list of size num_of_vectors on success, and NULL on failure
     if (py_wam_matrix == NULL) {
         print_error();
     }
@@ -218,7 +219,7 @@ static PyObject *gl1(PyObject *self, PyObject *args) {
 
     // create new python list (to return to python) and insert C_gl_matrix into the list
     py_gl_matrix = PyList_New(num_of_vectors);
-     // PyList_New returns a list of size num_of_vectors on success, and NULL on failure
+    // PyList_New returns a list of size num_of_vectors on success, and NULL on failure
     if (py_gl_matrix == NULL) {
         print_error();
     }
@@ -291,8 +292,8 @@ static PyObject *jacobi1(PyObject *self, PyObject *args) {
 
     // create new python list (to return to python) and insert C_jacobi_matrix into the list
 
-    py_jacobi_matrix = PyList_New(num_of_vectors+1);
-     // PyList_New returns a list of size num_of_vectors on success, and NULL on failure
+    py_jacobi_matrix = PyList_New(num_of_vectors + 1);
+    // PyList_New returns a list of size num_of_vectors on success, and NULL on failure
     if (py_jacobi_matrix == NULL) {
         print_error();
     }
@@ -419,7 +420,7 @@ static PyObject *eigengap_heuristic1(PyObject *self, PyObject *args) {
     if (C_jacobi_matrix == NULL) {
         print_error();
     }
-    for (i = 0; i < num_of_vectors+1; i++) {
+    for (i = 0; i < num_of_vectors + 1; i++) {
         C_jacobi_matrix[i] = (double *) malloc(num_of_vectors * sizeof(double));
         if (C_jacobi_matrix[i] == NULL) {
             print_error();
@@ -473,7 +474,7 @@ static PyObject *calculateUmatrix1(PyObject *self, PyObject *args) {
     if (C_jacobi_matrix == NULL) {
         print_error();
     }
-    for (i = 0; i < num_of_vectors +1; i++) {
+    for (i = 0; i < num_of_vectors + 1; i++) {
         C_jacobi_matrix[i] = (double *) malloc(num_of_vectors * sizeof(double));
         if (C_jacobi_matrix[i] == NULL) {
             print_error();
@@ -491,7 +492,7 @@ static PyObject *calculateUmatrix1(PyObject *self, PyObject *args) {
     C_U_matrix = calculateUmatrix(C_jacobi_matrix, num_of_vectors, k);
 
     py_u_matrix = PyList_New(num_of_vectors);
-     // PyList_New returns a list of size num_of_vectors on success, and NULL on failure
+    // PyList_New returns a list of size num_of_vectors on success, and NULL on failure
     if (py_u_matrix == NULL) {
         print_error();
     }
@@ -527,46 +528,46 @@ static PyMethodDef kmeanssp_methods[] = {
         {
                 "wam", // name exposed to Python
                 wam1, // C wrapper function
-                METH_VARARGS, // received variable args (but really just 1)
+                     METH_VARARGS, // received variable args (but really just 1)
                 "Returns the wam matrix" // documentation
         },
         {
                 "ddg", // name exposed to Python
                 ddg1, // C wrapper function
-                METH_VARARGS, // received variable args (but really just 1)
+                     METH_VARARGS, // received variable args (but really just 1)
                 "Returns the ddg matrix" // documentation
         },
         {
                 "gl", // name exposed to Python
                 gl1, // C wrapper function
-                METH_VARARGS, // received variable args (but really just 1)
+                     METH_VARARGS, // received variable args (but really just 1)
                 "Returns the gl matrix" // documentation
         },
         {
                 "jacobi", // name exposed to Python
                 jacobi1, // C wrapper function
-                METH_VARARGS, // received variable args (but really just 1)
+                     METH_VARARGS, // received variable args (but really just 1)
                 "Returns the jacobi matrix" // documentation
         },
         {
                 "spk", // name exposed to Python
                 spk, // C wrapper function
-                METH_VARARGS, // received variable args (but really just 1)
+                     METH_VARARGS, // received variable args (but really just 1)
                 "performs spkmeans (kmeanspp with specific values)" // documentation
         },
         {
                 "eigengap_heuristic", // name exposed to Python
                 eigengap_heuristic1, // C wrapper function
-                METH_VARARGS, // received variable args (but really just 1)
+                     METH_VARARGS, // received variable args (but really just 1)
                 "Returns relevant k" // documentation
         },
         {
                 "calculateUmatrix", // name exposed to Python
                 calculateUmatrix1, // C wrapper function
-                METH_VARARGS, // received variable args (but really just 1)
+                     METH_VARARGS, // received variable args (but really just 1)
                 "Returns the U matrix" // documentation
         },
-        { NULL, NULL, 0, NULL }
+        {NULL, NULL, 0, NULL}
 };
 
 static struct PyModuleDef mykmeanssp = {

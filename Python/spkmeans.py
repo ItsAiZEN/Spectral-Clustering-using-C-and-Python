@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 import mykmeanssp
 
-# TODO: either check memory of eigengap, calculateUmatrix and kmeanspp or move them to the c api.
 # TODO: make the code run on NOVA
 # TODO: make the code more elegant
 # TODO: final tests and documentation
