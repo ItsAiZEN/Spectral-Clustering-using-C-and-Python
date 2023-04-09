@@ -368,7 +368,7 @@ static PyObject *spk(PyObject *self, PyObject *args) {
     if (init_centroids == NULL) {
         print_error();
     }
-    for (i = 0; i < n; i++) {
+    for (i = 0; i < k; i++) {
         init_centroids[i] = (double *) malloc(k * sizeof(double));
         if (init_centroids[i] == NULL) {
             print_error();
