@@ -35,7 +35,8 @@ static PyObject *create_pyList_from_C(double **C_matrix, int num_of_rows, int nu
 
 double **create_Cmatrix_from_Py(PyObject *pyList, int num_of_rows, int num_of_cols) {
     double **C_matrix;
-    int num, i, j;
+    double num;
+    int i, j;
     PyObject *item_row;
     PyObject *item_col;
 
