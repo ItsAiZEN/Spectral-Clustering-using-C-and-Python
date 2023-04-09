@@ -35,7 +35,7 @@ static PyObject *create_pyList_from_C(double **C_matrix, int num_of_rows, int nu
 
 double **create_Cmatrix_from_Py(PyObject *pyList, int num_of_rows, int num_of_cols) {
     double **C_matrix;
-    int num;
+    int num, i, j;
     PyObject *item_row;
     PyObject *item_col;
 
@@ -412,7 +412,7 @@ static PyObject *spk_module(PyObject *self, PyObject *args) {
         return NULL;
     }
 
-    vector_list = create_Cmatrix_from_Py(pyObjVector_list, num_of_vectors, vector_dimension);
+    vector_list = create_Cmatrix_from_Py(pyObjVector_list, n, k);
     /* transform input vector list (given in Python) to C so that we can use it as an argument in the C kmeanspp function*/
     /* vector_list = (double **) malloc(n * sizeof(double *));
      if (vector_list == NULL) {
