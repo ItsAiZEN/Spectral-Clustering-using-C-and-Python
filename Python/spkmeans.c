@@ -15,6 +15,15 @@ int main(int argc, char **argv) {
     double **ddg_returned;
     int i;
     int j;
+    /*
+    !!!
+    */
+    double **init_centroids;
+    int q;
+    double **u_matrix;
+    /*
+    !!!
+    */
     FILE *file;
     vector_dimension = 0;
     vector_count = 0;
@@ -65,30 +74,43 @@ int main(int argc, char **argv) {
         }
     }
     fclose(file);
-   /* 
-    returned_matrix = (double**)malloc(vector_count * sizeof(double *));
-    if (returned_matrix == NULL) {
+
+     /*
+    !!!
+    */
+    init_centroids = (double**)malloc(vector_dimension * sizeof(double *));
+    if (init_centroids == NULL) {
         print_error();
     }
     for (i = 0; i < vector_count; i++) {
-        returned_matrix[i] = (double*)malloc(vector_count * sizeof(double));
-        if (returned_matrix[i] == NULL) {
+        init_centroids[i] = (double*)malloc(vector_dimension * sizeof(double));
+        if (init_centroids[i] == NULL) {
             print_error();
         }
     }
-    returned_jacobi_matrix = (double**)malloc((vector_count + 1) * sizeof(double *));
-    if (returned_jacobi_matrix == NULL) {
-        print_error();
-    }
-    for (i = 0; i < vector_count + 1; i++) {
-        returned_jacobi_matrix[i] = (double*)malloc(vector_count * sizeof(double));
-        if (returned_jacobi_matrix[i] == NULL) {
-            print_error();
+
+    for (i = 0; i < vector_dimension; i++) {
+        for (j = 0; j < vector_dimension; j++) {
+            init_centroids[i][j] = vector_list[i][j];
         }
     }
-*/	
-	
-    if (strcmp(goal, "wam") == 0) {
+	if (strcmp(goal, "eg") == 0){
+        returned_matrix = wam(vector_list, vector_count, vector_dimension);
+        q = eigengap_heuristic(vector_list, vector_count);
+        }
+    if (strcmp(goal, "um") == 0){
+        returned_matrix = wam(vector_list, vector_count, vector_dimension);
+        u_matrix = calculateUmatrix(vector_list, vector_count, 4);
+        }
+    if (strcmp(goal, "spk") == 0){
+        returned_matrix = wam(vector_list, vector_count, vector_dimension);
+        kmeanspp(vector_dimension, 300, vector_dimension, vector_count, vector_list, 0, init_centroids);
+        }
+     /*
+    !!!
+    */
+
+    else if (strcmp(goal, "wam") == 0) {
         returned_matrix = wam(vector_list, vector_count, vector_dimension);
     } else if (strcmp(goal, "ddg") == 0) {
         wam_returned = wam(vector_list, vector_count, vector_dimension);
@@ -148,17 +170,17 @@ int main(int argc, char **argv) {
         free(vector_list[i]);
     }
     free(vector_list);
-    
-  /*  
-    for (i = 0; i < vector_count; i++) {
-        free(returned_matrix[i]);
+     /*
+    !!!
+    */
+    for (i = 0; i < vector_dimension; i++) {
+        free(init_centroids[i]);
     }
-    free(returned_matrix);
-    for (i = 0; i < vector_count + 1; i++) {
-        free(returned_jacobi_matrix[i]);
-    }
-    free(returned_jacobi_matrix);
-*/
+    free(init_centroids);
+     /*
+    !!!
+    */
+
     return 0;
 }
 
