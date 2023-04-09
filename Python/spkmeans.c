@@ -15,15 +15,6 @@ int main(int argc, char **argv) {
     double **ddg_returned;
     int i;
     int j;
-    /*
-    !!!
-    */
-    double **init_centroids;
-    int q;
-    double **u_matrix;
-    /*
-    !!!
-    */
     FILE *file;
     vector_dimension = 0;
     vector_count = 0;
@@ -75,51 +66,7 @@ int main(int argc, char **argv) {
     }
     fclose(file);
 
-     /*
-    !!!
-    */
-    init_centroids = (double**)malloc(vector_dimension * sizeof(double *));
-    if (init_centroids == NULL) {
-        print_error();
-    }
-    for (i = 0; i < vector_count; i++) {
-        init_centroids[i] = (double*)malloc(vector_dimension * sizeof(double));
-        if (init_centroids[i] == NULL) {
-            print_error();
-        }
-    }
-
-    for (i = 0; i < vector_dimension; i++) {
-        for (j = 0; j < vector_dimension; j++) {
-            init_centroids[i][j] = vector_list[i][j];
-        }
-    }
-	if (strcmp(goal, "eg") == 0){
-        returned_matrix = wam(vector_list, vector_count, vector_dimension);
-        q = eigengap_heuristic(vector_list, vector_count);
-        printf("%d\n", q);
-        }
-    if (strcmp(goal, "um") == 0){
-        returned_matrix = wam(vector_list, vector_count, vector_dimension);
-        u_matrix = calculateUmatrix(vector_list, vector_count, 4);
-        /* print the matrix */
-        for (i = 0; i < vector_count; i++) {
-            for (j = 0; j < vector_count; j++) {
-                if (j == vector_count - 1)
-                    printf("%.4f\n", u_matrix[i][j]);
-                else
-                    printf("%.4f%c", u_matrix[i][j], ',');
-            }
-        }
-    if (strcmp(goal, "spk") == 0){
-        returned_matrix = wam(vector_list, vector_count, vector_dimension);
-        kmeanspp(vector_dimension, 300, vector_dimension, vector_count, vector_list, 0, init_centroids);
-        }
-     /*
-    !!!
-    */
-
-    else if (strcmp(goal, "wam") == 0) {
+    if (strcmp(goal, "wam") == 0) {
         returned_matrix = wam(vector_list, vector_count, vector_dimension);
     } else if (strcmp(goal, "ddg") == 0) {
         wam_returned = wam(vector_list, vector_count, vector_dimension);
@@ -179,16 +126,6 @@ int main(int argc, char **argv) {
         free(vector_list[i]);
     }
     free(vector_list);
-     /*
-    !!!
-    */
-    for (i = 0; i < vector_dimension; i++) {
-        free(init_centroids[i]);
-    }
-    free(init_centroids);
-     /*
-    !!!
-    */
 
     return 0;
 }
@@ -772,14 +709,14 @@ void kmeanspp(int num_of_clusters, int num_of_iterations, int vector_dimension, 
                 max_distance = euclidean_distance(temp_centroid, centroids[j], vector_dimension);
             }
         }
-        if (max_distance <= eps) {
-            break;
-        }
         for (i = 0; i < num_of_clusters; i++) {
             for (j = 0; j < cluster_sizes_copy[i]; j++) {
                 free(clusters[i][j]);
             }
             free(clusters[i]);
+        }
+        if (max_distance <= eps) {
+            break;
         }
     }
     for (i = 0; i < num_of_clusters; i++) {
@@ -798,16 +735,6 @@ void kmeanspp(int num_of_clusters, int num_of_iterations, int vector_dimension, 
     free(centroids);
     free(temp_centroid);
     free(cluster_sizes);
-
-    /* in the previous assignment (HW2) we had munmap_chunk(): invalid pointer error, we assume this caused the mistake
-     and that is why it is currently commented out
-     for (i = 0; i < num_of_clusters; i++) {
-        for (j = 0; j < cluster_sizes_copy[i]; j++) {
-            free(clusters[i][j]);
-        }
-        free(clusters[i]);
-    }*/
-
     free(clusters);
     free(cluster_sizes_copy);
 }
