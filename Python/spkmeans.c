@@ -16,6 +16,7 @@ int main(int argc, char **argv) {
     vector_dimension = 0;
     vector_count = 0;
     scan = 0;
+    scan = scan + 1;
 
     /* checks if the number of arguments is correct */
     if (argc != 3) {
