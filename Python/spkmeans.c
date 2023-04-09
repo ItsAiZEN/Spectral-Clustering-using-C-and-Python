@@ -15,6 +15,7 @@ int main(int argc, char **argv) {
 
     vector_dimension = 0;
     vector_count = 0;
+    scan = 0;
 
     /* checks if the number of arguments is correct */
     if (argc != 3) {
@@ -82,7 +83,7 @@ int main(int argc, char **argv) {
         }
         free(returned_matrix);
     }
-    } else if (strcmp(goal, "ddg") == 0) {
+    else if (strcmp(goal, "ddg") == 0) {
         wam_returned = wam(vector_list, vector_count, vector_dimension);
         returned_matrix = ddg(wam_returned, vector_count);
         for (i = 0; i < vector_count; i++) {
@@ -102,7 +103,7 @@ int main(int argc, char **argv) {
         }
         free(returned_matrix);
     }
-    } else if (strcmp(goal, "gl") == 0) {
+    else if (strcmp(goal, "gl") == 0) {
         wam_returned = wam(vector_list, vector_count, vector_dimension);
         ddg_returned = ddg(wam_returned, vector_count);
         returned_matrix = gl(ddg_returned, wam_returned, vector_count);
@@ -127,7 +128,7 @@ int main(int argc, char **argv) {
         }
         free(returned_matrix);
     }
-    } else if (strcmp(goal, "jacobi") == 0) {
+    else if (strcmp(goal, "jacobi") == 0) {
         returned_jacobi_matrix = jacobi(vector_list, vector_count);
         for (i = 0; i < vector_count + 1; i++) {
             for (j = 0; j < vector_count; j++) {
@@ -141,9 +142,11 @@ int main(int argc, char **argv) {
             free(returned_jacobi_matrix[i]);
         }
         free(returned_jacobi_matrix);
-    } else {
+    }
+    else {
         print_error();
     }
+
 
     /*free memory*/
     for (i = 0; i < vector_count; i++) {
