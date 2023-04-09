@@ -44,8 +44,6 @@ import mykmeanssp
 # if it doesn't work, try:
 # python3 setup.py build_ext --inplace
 
-# TODO: make the code more elegant
-# TODO: final tests and documentation
 
 # seed set for uniformity, can be removed if needed
 np.random.seed(0)
