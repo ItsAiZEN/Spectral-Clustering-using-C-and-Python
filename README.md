@@ -12,7 +12,8 @@
 
     Files and inputs are given in the following format:
     1. C code - the first argument is the goal (wam, ddg, gl, jacobi), the second argument is the file name
-    2. Python code - the first argument is the number of clusters (optional), second is the goal (wam, ddg, gl, jacobi, spk), third is the file name
+    2. Python code - the first argument is the number of clusters (optional), second is the goal
+       (wam, ddg, gl, jacobi, spk), third is the file name
 
     The input file is a csv file with the following format:
     1. each line represents a vector, each value is separated by a comma
@@ -23,7 +24,8 @@
     2. the rest of the lines are the eigenvectors (as columns)
 
     Output for spk goal has the following format:
-    1. first line is the observation indices of the chosen vectors (k eigenvectors as columns chosen by the algorithm) for initial centroids
+    1. first line is the observation indices of the chosen vectors (k eigenvectors as columns chosen by the algorithm)
+       for initial centroids
     2. the rest of the lines are the centroids
 
     all the other goals output a matrix with the following format:
