@@ -97,10 +97,19 @@ int main(int argc, char **argv) {
 	if (strcmp(goal, "eg") == 0){
         returned_matrix = wam(vector_list, vector_count, vector_dimension);
         q = eigengap_heuristic(vector_list, vector_count);
+        printf("%d\n", q);
         }
     if (strcmp(goal, "um") == 0){
         returned_matrix = wam(vector_list, vector_count, vector_dimension);
         u_matrix = calculateUmatrix(vector_list, vector_count, 4);
+        /* print the matrix */
+        for (i = 0; i < vector_count; i++) {
+            for (j = 0; j < vector_count; j++) {
+                if (j == vector_count - 1)
+                    printf("%.4f\n", u_matrix[i][j]);
+                else
+                    printf("%.4f%c", u_matrix[i][j], ',');
+            }
         }
     if (strcmp(goal, "spk") == 0){
         returned_matrix = wam(vector_list, vector_count, vector_dimension);
