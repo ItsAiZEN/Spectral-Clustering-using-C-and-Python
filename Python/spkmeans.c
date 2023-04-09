@@ -179,12 +179,12 @@ double **ddg(double **wam_matrix, int num_of_vectors) {
     int i;
     int j;
     double sum;
-    ddg_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
+    ddg_matrix = (double **) calloc(num_of_vectors, sizeof(double *));
     if (ddg_matrix == NULL) {
         print_error();
     }
     for (i = 0; i < num_of_vectors; i++) {
-        ddg_matrix[i] = (double *) malloc(num_of_vectors * sizeof(double));
+        ddg_matrix[i] = (double *) calloc(num_of_vectors, sizeof(double));
         if (ddg_matrix[i] == NULL) {
             print_error();
         }
