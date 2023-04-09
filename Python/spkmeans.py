@@ -65,14 +65,15 @@ else:
 # read the csv file into a pandas dataframe
 vectors1 = pd.read_csv(file, header=None)
 vector_dimension = vectors1.shape[1]
-N = vectors1.shape[0]
+num_of_vectors = vectors1.shape[0]
+file.close()
 
 # convert the pandas dataframe into a list of lists
 vectors = vectors1.values.tolist()
 
 # checks the validity of the input
 if len(sys.argv) == 4:
-    if k >= N or k <= 1:
+    if k >= num_of_vectors or k <= 1:
         print("An Error Has Occurred")
         exit()
 
@@ -128,58 +129,56 @@ def kmeans_pp(u_matrix1, k_dimension):
 
 
 if goal == "wam":
-    wam = mykmeanssp.wam(vectors, N, vector_dimension)
-    size = len(wam)
-    for i in range(size):
-        for j in range(size):
+    wam = mykmeanssp.wam(vectors, num_of_vectors, vector_dimension)
+    for i in range(num_of_vectors):
+        for j in range(num_of_vectors):
             print('%.4f' % wam[i][j], end="")
-            if j != N - 1:
+            if j != num_of_vectors - 1:
                 print(",", end="")
         print()
 
 elif goal == "ddg":
-    wam = mykmeanssp.wam(vectors, N, vector_dimension)
-    ddg = mykmeanssp.ddg(wam, len(wam))
-    size = len(ddg)
-    for i in range(size):
-        for j in range(size):
+    wam = mykmeanssp.wam(vectors, num_of_vectors, vector_dimension)
+    ddg = mykmeanssp.ddg(wam, num_of_vectors)
+    for i in range(num_of_vectors):
+        for j in range(num_of_vectors):
             print('%.4f' % ddg[i][j], end="")
-            if j != N - 1:
+            if j != num_of_vectors - 1:
                 print(",", end="")
         print()
 
 elif goal == "gl":
-    wam = mykmeanssp.wam(vectors, N, vector_dimension)
-    ddg = mykmeanssp.ddg(wam, len(wam))
-    gl = mykmeanssp.gl(wam, ddg, len(wam))
-    size = len(gl)
-    for i in range(size):
-        for j in range(size):
+    wam = mykmeanssp.wam(vectors, num_of_vectors, vector_dimension)
+    ddg = mykmeanssp.ddg(wam, num_of_vectors)
+    gl = mykmeanssp.gl(wam, ddg, num_of_vectors)
+    for i in range(num_of_vectors):
+        for j in range(num_of_vectors):
             print('%.4f' % gl[i][j], end="")
-            if j != N - 1:
+            if j != num_of_vectors - 1:
                 print(",", end="")
         print()
 
 elif goal == "jacobi":
-    jacobi = mykmeanssp.jacobi(vectors, N)
-    size = len(jacobi) - 1
-    for i in range(size + 1):
-        for j in range(size):
+    jacobi = mykmeanssp.jacobi(vectors, num_of_vectors)
+    for i in range(num_of_vectors + 1):
+        for j in range(num_of_vectors):
             print('%.4f' % jacobi[i][j], end="")
-            if j != N - 1:
+            if j != num_of_vectors - 1:
                 print(",", end="")
         print()
 
 
 elif goal == "spk":
-    wam = mykmeanssp.wam(vectors, N, vector_dimension)
-    ddg = mykmeanssp.ddg(wam, len(wam))
-    gl = mykmeanssp.gl(wam, ddg, len(wam))
-    jacobi = mykmeanssp.jacobi(gl, len(gl))
+    wam = mykmeanssp.wam(vectors, num_of_vectors, vector_dimension)
+    ddg = mykmeanssp.ddg(wam, num_of_vectors)
+    gl = mykmeanssp.gl(wam, ddg, num_of_vectors)
+    jacobi = mykmeanssp.jacobi(gl, num_of_vectors)
     if len(sys.argv) == 3:
-        k = mykmeanssp.eigengap_heuristic(jacobi, len(jacobi) - 1)
-    u_matrix = mykmeanssp.calculateUmatrix(jacobi, len(jacobi) - 1, k)
+        k = mykmeanssp.eigengap_heuristic(jacobi, num_of_vectors)
+    u_matrix = mykmeanssp.calculateUmatrix(jacobi, num_of_vectors, k)
 
     kmeans_pp(u_matrix, k)
 
-file.close()
+else:
+    print("An Error Has Occurred")
+    exit()

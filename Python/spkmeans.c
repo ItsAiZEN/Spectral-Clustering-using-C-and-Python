@@ -10,11 +10,9 @@ int main(int argc, char **argv) {
     char *goal;
     char *file_name;
     char c;
-    int vector_dimension;
-    int vector_count;
-    int i;
-    int j;
+    int vector_dimension, vector_count, i, j;
     FILE *file;
+
     vector_dimension = 0;
     vector_count = 0;
 
@@ -152,8 +150,7 @@ double euclidean_distance(double *vector1, double *vector2, int max_d) {
 /* wam = weighted adjacency matrix */
 double **wam(double **vectors, int num_of_vectors, int vector_dimension) {
     double **wam_matrix;
-    int i;
-    int j;
+    int i, j;
     wam_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
     if (wam_matrix == NULL) {
         print_error();
@@ -180,8 +177,7 @@ double **wam(double **vectors, int num_of_vectors, int vector_dimension) {
 double **ddg(double **wam_matrix, int num_of_vectors) {
     double **ddg_matrix;
     double sum;
-    int i;
-    int j;
+    int i, j;
     ddg_matrix = (double **) calloc(num_of_vectors, sizeof(double *));
     if (ddg_matrix == NULL) {
         print_error();
@@ -202,11 +198,10 @@ double **ddg(double **wam_matrix, int num_of_vectors) {
     return ddg_matrix;
 }
 
- /* gl = graph laplacian (ddg - wam) */
+/* gl = graph laplacian (ddg - wam) */
 double **gl(double **ddg_matrix, double **wam_matrix, int num_of_vectors) {
     double **gl_matrix;
-    int i;
-    int j;
+    int i, j;
     gl_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
     if (gl_matrix == NULL) {
         print_error();
@@ -229,8 +224,7 @@ double **gl(double **ddg_matrix, double **wam_matrix, int num_of_vectors) {
 int *find_largest_absolute_value_coordinates(double **matrix, int num_of_vectors) {
     double max;
     int *coordinates;
-    int i;
-    int j;
+    int i, j;
     max = 0;
     coordinates = (int *) malloc(2 * sizeof(int));
     if (coordinates == NULL) {
@@ -251,7 +245,7 @@ int *find_largest_absolute_value_coordinates(double **matrix, int num_of_vectors
     return coordinates;
 }
 
- /*returns the sign of a number (positive or negative, for 0 returns 1)*/
+/*returns the sign of a number (positive or negative, for 0 returns 1)*/
 int sign(double x) {
     if (x >= 0) {
         return 1;
@@ -259,18 +253,11 @@ int sign(double x) {
     return -1;
 }
 
- /*calculates P matrix*/
+/*calculates P matrix*/
 double **calculate_rotation_matrix(double **mat, int num_of_vectors, int *coordinates) {
     double **rotation_matrix;
-    double aii;
-    double ajj;
-    double aij;
-    double t;
-    double c;
-    double s;
-    double theta;
-    int i;
-    int j;
+    double aii, ajj, aij, t, c, s, theta;
+    int i, j;
     rotation_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
     if (rotation_matrix == NULL) {
         print_error();
@@ -308,10 +295,8 @@ double **calculate_rotation_matrix(double **mat, int num_of_vectors, int *coordi
 /* checks if the difference between the sum of the squares of the off diagonal elements of the current matrix
      and the previous matrix is smaller than eps*/
 int check_convergence(double **matrix, double **previous_matrix, int num_of_vectors, double eps) {
-    double previous_sum;
-    double sum;
-    int i;
-    int j;
+    double sum, previous_sum;
+    int i, j;
     previous_sum = 0;
     sum = 0;
     for (i = 0; i < num_of_vectors; i++) {
@@ -332,9 +317,8 @@ int check_convergence(double **matrix, double **previous_matrix, int num_of_vect
 /* multiplies two square matrices */
 double **multiply_matrices(double **matrix1, double **matrix2, int num_of_vectors) {
     double **result_matrix;
-    int i;
-    int j;
-    int k;
+    int i, j, k;
+
     result_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
     if (result_matrix == NULL) {
         print_error();
@@ -364,14 +348,9 @@ double **jacobi(double **original_matrix, int num_of_vectors) {
     double **final_matrix; /* the matrix that contains the eigenvectors as columns at the end of the iteration (multiplication of all P matrices)*/
     double **previous_matrix; /* "matrix" from the previous iteration (A)*/
     double **mul_matrices;
-    double eps;
-    double s;
-    double c;
+    double eps, s, c;
     int *coordinates;
-    int num_of_iterations;
-    int i;
-    int j;
-    int k;
+    int num_of_iterations, i, j, k;
     matrix = (double **) malloc(num_of_vectors * sizeof(double *));
     if (matrix == NULL) {
         print_error();
@@ -527,8 +506,7 @@ int sortFunc(const void *a, const void *b) {
 int eigengap_heuristic(double **jacobi_matrix, int num_of_vectors) {
     double *eigenvalues;
     double k;
-    int i;
-    int index;
+    int i, index;
     k = 0;
     eigenvalues = (double *) malloc(num_of_vectors * sizeof(double));
     if (eigenvalues == NULL) {
@@ -553,9 +531,8 @@ int eigengap_heuristic(double **jacobi_matrix, int num_of_vectors) {
 double **calculateUmatrix(double **jacobi_matrix, int num_of_vectors, int k) {
     double **U;
     double *eigenvalues;
-    int i;
-    int j;
-    int l;
+    int i, j, l;
+
     eigenvalues = (double *) malloc(num_of_vectors * sizeof(double));
     if (eigenvalues == NULL) {
         print_error();
@@ -596,24 +573,10 @@ void kmeanspp(int num_of_clusters, int num_of_iterations, int vector_dimension, 
     double ***clusters;
     double **centroids;
     double *temp_centroid;
-    double max_distance;
-    double min_distance1;
-    double min_distance2;
-    double distance1;
-    double distance2;
-    double sum;
     int *cluster_sizes_copy;
     int *cluster_sizes;
-    int min_index1;
-    int min_index2;
-    int i;
-    int j;
-    int m;
-    int n;
-    int l;
-    int k;
-    int p;
-    int q;
+    double max_distance, min_distance1, min_distance2, distance1, distance2, sum;
+    int min_index1, min_index2, i, j, m, n, l, k, p, q;
 
     max_distance = -1;
     centroids = calloc(num_of_clusters, sizeof(double *));
