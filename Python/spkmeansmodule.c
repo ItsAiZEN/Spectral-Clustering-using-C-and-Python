@@ -1,17 +1,16 @@
-
 #define PY_SSIZE_T_CLEAN
 
 #include <Python.h>
 #include "spkmeans.h"
 
-static PyObject *wam1(PyObject *self, PyObject *args) {
-    int num_of_vectors;
-    int vector_dimension;
+static PyObject *wam_module(PyObject *self, PyObject *args) {
     double **Cwam_matrix;
     double **vector_list;
+    double num;
+    int num_of_vectors;
+    int vector_dimension;
     int i;
     int j;
-    double num;
     PyObject *wam_num;
     PyObject *pyObj_vectors;
     PyObject *item_row;
@@ -20,12 +19,12 @@ static PyObject *wam1(PyObject *self, PyObject *args) {
     PyObject *py_wam_matrix_row;
     PyObject *return_val;
 
-    // check args are as expected
+    /* check args are as expected */
     if (!PyArg_ParseTuple(args, "Oii", &pyObj_vectors, &num_of_vectors, &vector_dimension)) {
         return NULL;
     }
 
-    // transform input vector list (given in Python) to C so that we can use it as an argument in the C wam function
+    /* transform input vector list (given in Python) to C so that we can use it as an argument in the C wam function*/
     vector_list = (double **) malloc(num_of_vectors * sizeof(double *));
     if (vector_list == NULL) {
         print_error();
@@ -36,6 +35,7 @@ static PyObject *wam1(PyObject *self, PyObject *args) {
             print_error();
         }
     }
+
     for (i = 0; i < num_of_vectors; i++) {
         item_row = PyList_GetItem(pyObj_vectors, i);
         for (j = 0; j < vector_dimension; j++) {
@@ -45,11 +45,11 @@ static PyObject *wam1(PyObject *self, PyObject *args) {
         }
     }
 
+    /* call wam function in C */
     Cwam_matrix = wam(vector_list, num_of_vectors, vector_dimension);
 
-    // create new python list (to return to python) and insert Cwam_matrix into the list
-    py_wam_matrix = PyList_New(
-            num_of_vectors); // PyList_New returns a list of size num_of_vectors on success, and NULL on failure
+    /* create new python list (to return to python) and insert Cwam_matrix into the list */
+    py_wam_matrix = PyList_New(num_of_vectors);
     if (py_wam_matrix == NULL) {
         print_error();
     }
@@ -62,29 +62,30 @@ static PyObject *wam1(PyObject *self, PyObject *args) {
         }
     }
 
-    // free memory (Cwam_matrix + vector_list in C)
+    /* free memory (Cwam_matrix + vector_list in C) */
     for (i = 0; i < num_of_vectors; i++) {
         free(Cwam_matrix[i]);
     }
     free(Cwam_matrix);
+
     for (i = 0; i < num_of_vectors; i++) {
         free(vector_list[i]);
     }
     free(vector_list);
 
-    // we are returning the python list that contains the wam matrix
-    return_val = Py_BuildValue("O", py_wam_matrix); // not sure if this should be "O" or maybe "O&";
+    /* we are returning the python list that contains the wam matrix */
+    return_val = Py_BuildValue("O", py_wam_matrix);
     return return_val;
 
 }
 
-static PyObject *ddg1(PyObject *self, PyObject *args) {
+static PyObject *ddg_module(PyObject *self, PyObject *args) {
     double **Cddg_matrix;
+    double **C_wam_matrix;
+    double num;
+    int num_of_vectors;
     int i;
     int j;
-    int num_of_vectors;
-    double num;
-    double **C_wam_matrix;
     PyObject *ddg_num;
     PyObject *return_val;
     PyObject *py_wam_matrix;
@@ -93,12 +94,12 @@ static PyObject *ddg1(PyObject *self, PyObject *args) {
     PyObject *py_ddg_matrix;
     PyObject *py_ddg_matrix_row;
 
-    // check args are as expected
+    /* check args are as expected */
     if (!PyArg_ParseTuple(args, "Oi", &py_wam_matrix, &num_of_vectors)) {
         return NULL;
     }
 
-    // transform input wam matrix (given as list in Python) to C so that we can use it as an argument in the C ddg function
+    /* transform input wam matrix (given as list in Python) to C so that we can use it as an argument in the C ddg function*/
     C_wam_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
     if (C_wam_matrix == NULL) {
         print_error();
@@ -109,6 +110,7 @@ static PyObject *ddg1(PyObject *self, PyObject *args) {
             print_error();
         }
     }
+
     for (i = 0; i < num_of_vectors; i++) {
         item_row = PyList_GetItem(py_wam_matrix, i);
         for (j = 0; j < num_of_vectors; j++) {
@@ -118,12 +120,11 @@ static PyObject *ddg1(PyObject *self, PyObject *args) {
         }
     }
 
-
+    /* call ddg function in C */
     Cddg_matrix = ddg(C_wam_matrix, num_of_vectors);
 
-    // create new python list (to return to python) and insert Cddg_matrix into the list
-    py_ddg_matrix = PyList_New(
-            num_of_vectors); // PyList_New returns a list of size num_of_vectors on success, and NULL on failure
+    /* create new python list (to return to python) and insert Cddg_matrix into the list */
+    py_ddg_matrix = PyList_New(num_of_vectors);
     if (py_ddg_matrix == NULL) {
         print_error();
     }
@@ -136,30 +137,31 @@ static PyObject *ddg1(PyObject *self, PyObject *args) {
         }
     }
 
-    // free memory (Cddg_matrix + C_wam_matrix)
+    /* free memory (Cddg_matrix + C_wam_matrix) */
     for (i = 0; i < num_of_vectors; i++) {
         free(Cddg_matrix[i]);
     }
     free(Cddg_matrix);
+
     for (i = 0; i < num_of_vectors; i++) {
         free(C_wam_matrix[i]);
     }
     free(C_wam_matrix);
 
-    // we are returning the python list that contains the ddg matrix
-    return_val = Py_BuildValue("O", py_ddg_matrix); // not sure if this should be "O" or maybe "O&";
+    /* we are returning the python list that contains the ddg matrix */
+    return_val = Py_BuildValue("O", py_ddg_matrix);
     return return_val;
 
 }
 
-static PyObject *gl1(PyObject *self, PyObject *args) {
-    int num_of_vectors;
+static PyObject *gl_module(PyObject *self, PyObject *args) {
     double **C_wam_matrix;
     double **C_ddg_matrix;
     double **C_gl_matrix;
+    int num_of_vectors;
+    double num;
     int i;
     int j;
-    double num;
     PyObject *gl_num;
     PyObject *item_row;
     PyObject *item_col;
@@ -170,12 +172,12 @@ static PyObject *gl1(PyObject *self, PyObject *args) {
     PyObject *py_gl_matrix_row;
 
 
-    // check args are as expected
+    /* check args are as expected */
     if (!PyArg_ParseTuple(args, "OOi", &py_ddg_matrix, &py_wam_matrix, &num_of_vectors)) {
         return NULL;
     }
 
-    // transform input wam matrix (given as list in Python) to C so that we can use it as an argument in the C ddg function
+    /* transform input wam matrix (given as list in Python) to C so that we can use it as an argument in the C gl function */
     C_wam_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
     if (C_wam_matrix == NULL) {
         print_error();
@@ -195,7 +197,7 @@ static PyObject *gl1(PyObject *self, PyObject *args) {
         }
     }
 
-    // transform input ddg matrix (given as list in Python) to C so that we can use it as an argument in the C ddg function
+    /* transform input ddg matrix (given as list in Python) to C so that we can use it as an argument in the C gl function */
     C_ddg_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
     if (C_ddg_matrix == NULL) {
         print_error();
@@ -206,6 +208,7 @@ static PyObject *gl1(PyObject *self, PyObject *args) {
             print_error();
         }
     }
+
     for (i = 0; i < num_of_vectors; i++) {
         item_row = PyList_GetItem(py_ddg_matrix, i);
         for (j = 0; j < num_of_vectors; j++) {
@@ -215,11 +218,11 @@ static PyObject *gl1(PyObject *self, PyObject *args) {
         }
     }
 
+    /* call gl function in C */
     C_gl_matrix = gl(C_wam_matrix, C_ddg_matrix, num_of_vectors);
 
-    // create new python list (to return to python) and insert C_gl_matrix into the list
+    /* create new python list (to return to python) and insert C_gl_matrix into the list */
     py_gl_matrix = PyList_New(num_of_vectors);
-    // PyList_New returns a list of size num_of_vectors on success, and NULL on failure
     if (py_gl_matrix == NULL) {
         print_error();
     }
@@ -232,29 +235,30 @@ static PyObject *gl1(PyObject *self, PyObject *args) {
         }
     }
 
-    // free memory (C_ddg_matrix + C_wam_matrix)
+    /* free memory (C_ddg_matrix + C_wam_matrix) */
     for (i = 0; i < num_of_vectors; i++) {
         free(C_ddg_matrix[i]);
     }
     free(C_ddg_matrix);
+
     for (i = 0; i < num_of_vectors; i++) {
         free(C_wam_matrix[i]);
     }
     free(C_wam_matrix);
 
-    // we are returning the python list that contains the gl matrix
-    return_val = Py_BuildValue("O", py_gl_matrix); // not sure if this should be "O" or maybe "O&";
+    /* we are returning the python list that contains the gl matrix */
+    return_val = Py_BuildValue("O", py_gl_matrix);
     return return_val;
 }
 
-static PyObject *jacobi1(PyObject *self, PyObject *args) {
+static PyObject *jacobi_module(PyObject *self, PyObject *args) {
     int num_of_vectors;
     double **C_matrix;
+    double **C_jacobi_matrix;
     double num;
-    PyObject *jacobi_num;
     int i;
     int j;
-    double **C_jacobi_matrix;
+    PyObject *jacobi_num;
     PyObject *return_val;
     PyObject *py_matrix;
     PyObject *item_row;
@@ -263,12 +267,12 @@ static PyObject *jacobi1(PyObject *self, PyObject *args) {
     PyObject *py_jacobi_matrix_row;
 
 
-    // check args are as expected
+    /* check args are as expected */
     if (!PyArg_ParseTuple(args, "Oi", &py_matrix, &num_of_vectors)) {
         return NULL;
     }
 
-    // transform input matrix (given as list in Python) to C so that we can use it as an argument in the C ddg function
+    /* transform input matrix (given as list in Python) to C so that we can use it as an argument in the C jacobi function */
     C_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
     if (C_matrix == NULL) {
         print_error();
@@ -279,6 +283,7 @@ static PyObject *jacobi1(PyObject *self, PyObject *args) {
             print_error();
         }
     }
+
     for (i = 0; i < num_of_vectors; i++) {
         item_row = PyList_GetItem(py_matrix, i);
         for (j = 0; j < num_of_vectors; j++) {
@@ -288,12 +293,11 @@ static PyObject *jacobi1(PyObject *self, PyObject *args) {
         }
     }
 
+    /* call jacobi function in C */
     C_jacobi_matrix = jacobi(C_matrix, num_of_vectors);
 
-    // create new python list (to return to python) and insert C_jacobi_matrix into the list
-
+    /* create new python list (to return to python) and insert C_jacobi_matrix into the list */
     py_jacobi_matrix = PyList_New(num_of_vectors + 1);
-    // PyList_New returns a list of size num_of_vectors on success, and NULL on failure
     if (py_jacobi_matrix == NULL) {
         print_error();
     }
@@ -307,43 +311,47 @@ static PyObject *jacobi1(PyObject *self, PyObject *args) {
         }
     }
 
-    // free memory (C_matrix + C_jacobi_matrix)
+    /* free memory (C_matrix + C_jacobi_matrix) */
     for (i = 0; i < num_of_vectors; i++) {
         free(C_matrix[i]);
     }
     free(C_matrix);
+
     for (i = 0; i < (num_of_vectors + 1); i++) {
         free(C_jacobi_matrix[i]);
     }
     free(C_jacobi_matrix);
 
 
-    // we are returning the python list that contains the gl matrix
-    return_val = Py_BuildValue("O", py_jacobi_matrix); // not sure if this should be "O" or maybe "O&";
+    /* we are returning the python list that contains the jacobi matrix */
+    return_val = Py_BuildValue("O", py_jacobi_matrix);
     return return_val;
 }
 
-static PyObject *spk(PyObject *self, PyObject *args) {
+static PyObject *spk_module(PyObject *self, PyObject *args) {
+    double **vector_list;
+    double **init_centroids;
+    double num;
     int n;
     int k;
     int i;
     int j;
-    double **vector_list;
-    double **init_centroids;
     PyObject *pyObjVector_list;
     PyObject *pyObjInit_centroids;
     PyObject *item_row;
     PyObject *item_col;
-    double num;
+
+    /* check args are as expected */
     if (!PyArg_ParseTuple(args, "iiOO", &k, &n, &pyObjVector_list, &pyObjInit_centroids)) {
         return NULL;
     }
 
+    /* check args are valid */
     if (n < 0 || k < 0) {
         return NULL;
     }
 
-    // transform py list with vectors (from U) to C matrix
+    /* transform input vector list (given in Python) to C so that we can use it as an argument in the C kmeanspp function*/
     vector_list = (double **) malloc(n * sizeof(double *));
     if (vector_list == NULL) {
         print_error();
@@ -354,6 +362,7 @@ static PyObject *spk(PyObject *self, PyObject *args) {
             print_error();
         }
     }
+
     for (i = 0; i < n; i++) {
         item_row = PyList_GetItem(pyObjVector_list, i);
         for (j = 0; j < k; j++) {
@@ -363,7 +372,7 @@ static PyObject *spk(PyObject *self, PyObject *args) {
         }
     }
 
-    // transform py list with init centroids to C matrix
+    /* transform input init_centroids list (given in Python) to C so that we can use it as an argument in the C kmeanspp function*/
     init_centroids = (double **) malloc(k * sizeof(double *));
     if (init_centroids == NULL) {
         print_error();
@@ -374,6 +383,7 @@ static PyObject *spk(PyObject *self, PyObject *args) {
             print_error();
         }
     }
+
     for (i = 0; i < k; i++) {
         item_row = PyList_GetItem(pyObjInit_centroids, i);
         for (j = 0; j < k; j++) {
@@ -383,39 +393,42 @@ static PyObject *spk(PyObject *self, PyObject *args) {
         }
     }
 
+    /* call kmeanspp function in C */
     kmeanspp(k, 300, k, n, vector_list, 0, init_centroids);
 
-    // free memory (vector_list + init_centroids)
+    /* free memory (vector_list + init_centroids) */
     for (i = 0; i < n; i++) {
         free(vector_list[i]);
     }
     free(vector_list);
+
     for (i = 0; i < k; i++) {
         free(init_centroids[i]);
     }
     free(init_centroids);
 
+    /* kmeanspp prints the result and is of void type so we do not need to return a value to Python */
     Py_RETURN_NONE;
 }
 
-static PyObject *eigengap_heuristic1(PyObject *self, PyObject *args) {
+static PyObject *eigengap_heuristic_module(PyObject *self, PyObject *args) {
+    double **C_jacobi_matrix;
     int num_of_vectors;
+    double num;
     int i;
     int j;
     int k;
-    double num;
-    double **C_jacobi_matrix;
     PyObject *item_row;
     PyObject *item_col;
     PyObject *return_val;
     PyObject *py_jacobi_matrix;
 
-
+    /* check args are as expected */
     if (!PyArg_ParseTuple(args, "Oi", &py_jacobi_matrix, &num_of_vectors)) {
         return NULL;
     }
 
-    // transform input jacobi matrix (given as list in Python) to C so that we can use it as an argument in the C ddg function
+    /* transform input jacobi matrix (given as list in Python) to C so that we can use it as an argument in the C eigengap_heuristic function */
     C_jacobi_matrix = (double **) malloc((num_of_vectors + 1) * sizeof(double *));
     if (C_jacobi_matrix == NULL) {
         print_error();
@@ -435,28 +448,27 @@ static PyObject *eigengap_heuristic1(PyObject *self, PyObject *args) {
         }
     }
 
-    // call eigengap heuristic function
+    /* call eigengap heuristic function in C */
     k = eigengap_heuristic(C_jacobi_matrix, num_of_vectors);
 
-    // free memory (C_jacobi_matrix)
+    /* free memory (C_jacobi_matrix) */
     for (i = 0; i < (num_of_vectors + 1); i++) {
         free(C_jacobi_matrix[i]);
     }
     free(C_jacobi_matrix);
 
-    // we are returning the python list that contains the gl matrix
-    return_val = Py_BuildValue("i", k); // not sure if this should be "O" or maybe "O&";
+    return_val = Py_BuildValue("i", k);
     return return_val;
 }
 
-static PyObject *calculateUmatrix1(PyObject *self, PyObject *args) {
+static PyObject *calculateUmatrix_module(PyObject *self, PyObject *args) {
+    double **C_jacobi_matrix;
+    double **C_U_matrix;
+    int num_of_vectors;
+    double num;
     int k;
     int i;
     int j;
-    int num_of_vectors;
-    double num;
-    double **C_jacobi_matrix;
-    double **C_U_matrix;
     PyObject *u_num;
     PyObject *py_jacobi_matrix;
     PyObject *item_row;
@@ -465,11 +477,12 @@ static PyObject *calculateUmatrix1(PyObject *self, PyObject *args) {
     PyObject *py_u_matrix_row;
     PyObject *return_val;
 
+    /* check args are as expected */
     if (!PyArg_ParseTuple(args, "Oii", &py_jacobi_matrix, &num_of_vectors, &k)) {
         return NULL;
     }
 
-    // transform input jacobi matrix (given as list in Python) to C so that we can use it as an argument in the C ddg function
+    /* transform input jacobi matrix (given as list in Python) to C so that we can use it as an argument in the C calculateUmatrix function */
     C_jacobi_matrix = (double **) malloc((num_of_vectors + 1) * sizeof(double *));
     if (C_jacobi_matrix == NULL) {
         print_error();
@@ -480,6 +493,7 @@ static PyObject *calculateUmatrix1(PyObject *self, PyObject *args) {
             print_error();
         }
     }
+
     for (i = 0; i < num_of_vectors + 1; i++) {
         item_row = PyList_GetItem(py_jacobi_matrix, i);
         for (j = 0; j < num_of_vectors; j++) {
@@ -488,15 +502,14 @@ static PyObject *calculateUmatrix1(PyObject *self, PyObject *args) {
             C_jacobi_matrix[i][j] = num;
         }
     }
-
+    /* call calculateUmatrix function in C */
     C_U_matrix = calculateUmatrix(C_jacobi_matrix, num_of_vectors, k);
 
+    /* create new python list (to return to python) and insert C_U_matrix into the list */
     py_u_matrix = PyList_New(num_of_vectors);
-    // PyList_New returns a list of size num_of_vectors on success, and NULL on failure
     if (py_u_matrix == NULL) {
         print_error();
     }
-
     for (i = 0; i < num_of_vectors; i++) {
         py_u_matrix_row = PyList_New(k);
         PyList_SetItem(py_u_matrix, i, py_u_matrix_row);
@@ -506,74 +519,73 @@ static PyObject *calculateUmatrix1(PyObject *self, PyObject *args) {
         }
     }
 
-    // free memory (C_jacobi_matrix)
+    /* free memory (C_jacobi_matrix + C_U_matrix) */
     for (i = 0; i < (num_of_vectors + 1); i++) {
         free(C_jacobi_matrix[i]);
     }
     free(C_jacobi_matrix);
 
-    // free memory (C_U_matrix)
     for (i = 0; i < num_of_vectors; i++) {
         free(C_U_matrix[i]);
     }
     free(C_U_matrix);
 
-    // we are returning the python list that contains the U matrix
-    return_val = Py_BuildValue("O", py_u_matrix); // not sure if this should be "O" or maybe "O&";
+    /* we are returning the python list that contains the U matrix */
+    return_val = Py_BuildValue("O", py_u_matrix);
     return return_val;
 }
 
 
 static PyMethodDef kmeanssp_methods[] = {
         {
-                "wam", // name exposed to Python
-                wam1, // C wrapper function
-                     METH_VARARGS, // received variable args (but really just 1)
-                "Returns the wam matrix" // documentation
+                "wam", /* name exposed to Python */
+                wam_module, /* C wrapper function */
+                     METH_VARARGS,
+                "Returns the wam matrix"
         },
         {
-                "ddg", // name exposed to Python
-                ddg1, // C wrapper function
-                     METH_VARARGS, // received variable args (but really just 1)
-                "Returns the ddg matrix" // documentation
+                "ddg", /* name exposed to Python */
+                ddg_module, /* C wrapper function */
+                     METH_VARARGS,
+                "Returns the ddg matrix"
         },
         {
-                "gl", // name exposed to Python
-                gl1, // C wrapper function
-                     METH_VARARGS, // received variable args (but really just 1)
-                "Returns the gl matrix" // documentation
+                "gl", /* name exposed to Python */
+                gl_module, /* C wrapper function */
+                     METH_VARARGS,
+                "Returns the gl matrix"
         },
         {
-                "jacobi", // name exposed to Python
-                jacobi1, // C wrapper function
-                     METH_VARARGS, // received variable args (but really just 1)
-                "Returns the jacobi matrix" // documentation
+                "jacobi", /* name exposed to Python */
+                jacobi_module, /* C wrapper function */
+                     METH_VARARGS,
+                "Returns the jacobi matrix"
         },
         {
-                "spk", // name exposed to Python
-                spk, // C wrapper function
-                     METH_VARARGS, // received variable args (but really just 1)
-                "performs spkmeans (kmeanspp with specific values)" // documentation
+                "spk", /* name exposed to Python */
+                spk_module, /* C wrapper function */
+                     METH_VARARGS,
+                "performs spkmeans (kmeanspp with specific values)"
         },
         {
-                "eigengap_heuristic", // name exposed to Python
-                eigengap_heuristic1, // C wrapper function
-                     METH_VARARGS, // received variable args (but really just 1)
-                "Returns relevant k" // documentation
+                "eigengap_heuristic", /* name exposed to Python */
+                eigengap_heuristic_module, /* C wrapper function */
+                     METH_VARARGS,
+                "Returns relevant k"
         },
         {
-                "calculateUmatrix", // name exposed to Python
-                calculateUmatrix1, // C wrapper function
-                     METH_VARARGS, // received variable args (but really just 1)
-                "Returns the U matrix" // documentation
+                "calculateUmatrix", /* name exposed to Python */
+                calculateUmatrix_module, /* C wrapper function */
+                     METH_VARARGS,
+                "Returns the U matrix"
         },
         {NULL, NULL, 0, NULL}
 };
 
 static struct PyModuleDef mykmeanssp = {
         PyModuleDef_HEAD_INIT,
-        "mykmeanssp",     // name of module exposed to Python
-        "A module that performs spectral clustering and returns wam, ddg, gl, jacobi matrices", // module documentation
+        "mykmeanssp",     /* name of module exposed to Python */
+        "A module that performs spectral clustering and can return wam, ddg, gl, jacobi matrices",
         -1,
         kmeanssp_methods
 };

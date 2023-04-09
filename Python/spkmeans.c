@@ -1,29 +1,31 @@
 #include "spkmeans.h"
 
-/* remember when calling a function that returns a matrix, don't allocate memory for returned value outside of function*/
 
 int main(int argc, char **argv) {
     double **returned_matrix;
     double **returned_jacobi_matrix;
-    char *goal;
-    char *file_name;
-    int vector_dimension;
-    int vector_count;
-    char c;
     double **vector_list;
     double **wam_returned;
     double **ddg_returned;
+    char *goal;
+    char *file_name;
+    char c;
+    int vector_dimension;
+    int vector_count;
     int i;
     int j;
     FILE *file;
     vector_dimension = 0;
     vector_count = 0;
 
+    /* checks if the number of arguments is correct */
     if (argc != 3) {
         print_error();
     }
     goal = argv[1];
     file_name = argv[2];
+
+    /* read the file and count the number of vectors and their dimension */
     file = fopen(file_name, "r");
     if (file == NULL) {
         print_error();
@@ -53,6 +55,7 @@ int main(int argc, char **argv) {
             print_error();
         }
     }
+    /* read the file and store the vectors in a matrix */
     fseek(file, 0, SEEK_SET);
     for (i = 0; i < vector_count; i++) {
         for (j = 0; j < vector_dimension; j++) {
@@ -135,7 +138,7 @@ void print_error() {
     exit(1);
 }
 
-
+/* returns the euclidean distance between two vectors */
 double euclidean_distance(double *vector1, double *vector2, int max_d) {
     double total_sum;
     int i;
@@ -146,8 +149,8 @@ double euclidean_distance(double *vector1, double *vector2, int max_d) {
     return sqrt(total_sum);
 }
 
-
-double **wam(double **vectors, int num_of_vectors, int vector_dimension) { /* wam = weighted adjacency matrix */
+/* wam = weighted adjacency matrix */
+double **wam(double **vectors, int num_of_vectors, int vector_dimension) {
     double **wam_matrix;
     int i;
     int j;
@@ -173,12 +176,12 @@ double **wam(double **vectors, int num_of_vectors, int vector_dimension) { /* wa
     return wam_matrix;
 }
 
+/*ddg = degree diagonal matrix (diagonal matrix with the sum of each row as the diagonal elements)*/
 double **ddg(double **wam_matrix, int num_of_vectors) {
-    /*ddg = degree diagonal matrix (diagonal matrix with the sum of each row as the diagonal elements)*/
     double **ddg_matrix;
+    double sum;
     int i;
     int j;
-    double sum;
     ddg_matrix = (double **) calloc(num_of_vectors, sizeof(double *));
     if (ddg_matrix == NULL) {
         print_error();
@@ -199,8 +202,8 @@ double **ddg(double **wam_matrix, int num_of_vectors) {
     return ddg_matrix;
 }
 
-
-double **gl(double **ddg_matrix, double **wam_matrix, int num_of_vectors) { /* gl = graph laplacian (ddg - wam) */
+ /* gl = graph laplacian (ddg - wam) */
+double **gl(double **ddg_matrix, double **wam_matrix, int num_of_vectors) {
     double **gl_matrix;
     int i;
     int j;
@@ -222,12 +225,12 @@ double **gl(double **ddg_matrix, double **wam_matrix, int num_of_vectors) { /* g
     return gl_matrix;
 }
 
+/*finds Aij for jacobi (off diagonal element with the largest absolute value)*/
 int *find_largest_absolute_value_coordinates(double **matrix, int num_of_vectors) {
-    /*finds Aij for jacobi (off diagonal element with the largest absolute value)*/
+    double max;
     int *coordinates;
     int i;
     int j;
-    double max;
     max = 0;
     coordinates = (int *) malloc(2 * sizeof(int));
     if (coordinates == NULL) {
@@ -248,18 +251,17 @@ int *find_largest_absolute_value_coordinates(double **matrix, int num_of_vectors
     return coordinates;
 }
 
-int sign(double x) { /*returns the sign of a number (positive or negative, for 0 returns 1)*/
+ /*returns the sign of a number (positive or negative, for 0 returns 1)*/
+int sign(double x) {
     if (x >= 0) {
         return 1;
     }
     return -1;
 }
 
-
-double **calculate_rotation_matrix(double **mat, int num_of_vectors, int *coordinates) { /*calculates P matrix*/
+ /*calculates P matrix*/
+double **calculate_rotation_matrix(double **mat, int num_of_vectors, int *coordinates) {
     double **rotation_matrix;
-    int i;
-    int j;
     double aii;
     double ajj;
     double aij;
@@ -267,6 +269,8 @@ double **calculate_rotation_matrix(double **mat, int num_of_vectors, int *coordi
     double c;
     double s;
     double theta;
+    int i;
+    int j;
     rotation_matrix = (double **) malloc(num_of_vectors * sizeof(double *));
     if (rotation_matrix == NULL) {
         print_error();
@@ -301,13 +305,13 @@ double **calculate_rotation_matrix(double **mat, int num_of_vectors, int *coordi
     return rotation_matrix;
 }
 
-int check_convergence(double **matrix, double **previous_matrix, int num_of_vectors, double eps) {
-    /* checks if the difference between the sum of the squares of the off diagonal elements of the current matrix
+/* checks if the difference between the sum of the squares of the off diagonal elements of the current matrix
      and the previous matrix is smaller than eps*/
-    int i;
-    int j;
+int check_convergence(double **matrix, double **previous_matrix, int num_of_vectors, double eps) {
     double previous_sum;
     double sum;
+    int i;
+    int j;
     previous_sum = 0;
     sum = 0;
     for (i = 0; i < num_of_vectors; i++) {
@@ -325,6 +329,7 @@ int check_convergence(double **matrix, double **previous_matrix, int num_of_vect
     return 0;
 }
 
+/* multiplies two square matrices */
 double **multiply_matrices(double **matrix1, double **matrix2, int num_of_vectors) {
     double **result_matrix;
     int i;
@@ -351,8 +356,8 @@ double **multiply_matrices(double **matrix1, double **matrix2, int num_of_vector
     return result_matrix;
 }
 
+/* calculates the eigenvalues and eigenvectors of a matrix using the jacobi method*/
 double **jacobi(double **original_matrix, int num_of_vectors) {
-    /* calculates the eigenvalues and eigenvectors of a matrix*/
     double **matrix; /* contains eigenvalues on diagonal at the end of the iteration (A')*/
     double **jacobi_matrix; /* contains eigenvalues in first row and eigenvectors as columns beneath (returned matrix)*/
     double **rot_mat; /* P for each iteration*/
@@ -360,13 +365,13 @@ double **jacobi(double **original_matrix, int num_of_vectors) {
     double **previous_matrix; /* "matrix" from the previous iteration (A)*/
     double **mul_matrices;
     double eps;
-    int num_of_iterations;
     double s;
     double c;
+    int *coordinates;
+    int num_of_iterations;
     int i;
     int j;
     int k;
-    int *coordinates;
     matrix = (double **) malloc(num_of_vectors * sizeof(double *));
     if (matrix == NULL) {
         print_error();
@@ -413,7 +418,7 @@ double **jacobi(double **original_matrix, int num_of_vectors) {
     for (k = 0; k < num_of_vectors; k++) {
         final_matrix[k][k] = 1;
     }
-    while (num_of_iterations < 100) { /* 100 is the maximum number of iterations as specified in the exercise*/
+    while (num_of_iterations < 100) { /* 100 is set as the maximum number of iterations*/
         num_of_iterations++;
         coordinates = find_largest_absolute_value_coordinates(matrix, num_of_vectors);
         i = coordinates[0];
@@ -422,7 +427,7 @@ double **jacobi(double **original_matrix, int num_of_vectors) {
         s = rot_mat[i][j];
         c = rot_mat[i][i];
         for (k = 0; k < num_of_vectors; k++) {
-            /* calculates the new matrix (A') using P and A instead of multiplying using P and A*/
+            /* calculates the new matrix (A') using P and A instead of multiplying using P and A */
             matrix[i][k] = c * previous_matrix[i][k] - s * previous_matrix[j][k];
             matrix[j][k] = s * previous_matrix[i][k] + c * previous_matrix[j][k];
             matrix[k][i] = matrix[i][k];
@@ -437,7 +442,6 @@ double **jacobi(double **original_matrix, int num_of_vectors) {
         matrix[j][i] = matrix[i][j];
         /* add current P to final matrix calculation*/
         mul_matrices = multiply_matrices(final_matrix, rot_mat, num_of_vectors);
-        /*final_matrix = mul_matrices;*/
         for (i = 0; i < num_of_vectors; i++) {
             for (j = 0; j < num_of_vectors; j++) {
                 final_matrix[i][j] = mul_matrices[i][j];
@@ -472,7 +476,7 @@ double **jacobi(double **original_matrix, int num_of_vectors) {
             print_error();
         }
     }
-    for (i = 0; i < num_of_vectors; i++) { /* eigenvalues in first row */
+    for (i = 0; i < num_of_vectors; i++) { /* set the eigenvalues as the first row */
         jacobi_matrix[0][i] = matrix[i][i];
     }
     for (i = 1; i < num_of_vectors + 1; i++) {
@@ -489,16 +493,11 @@ double **jacobi(double **original_matrix, int num_of_vectors) {
         free(final_matrix[i]);
     }
     free(final_matrix);
-    /*   for (i = 0; i < num_of_vectors; i++) {
-           free(rot_mat[i]);
-       }
-       free(rot_mat);
-       free(coordinates); */
     for (i = 0; i < num_of_vectors; i++) {
         free(previous_matrix[i]);
     }
     free(previous_matrix);
-    /* check if any of the eigenvalues between -0.0000 to -0.0001, if so multiply by -1*/
+    /* check if any of the eigenvalues between -0.0000 to -0.0001, if so multiply by -1 */
     for (i = 0; i < num_of_vectors; i++) {
         if (jacobi_matrix[0][i] < 0 && jacobi_matrix[0][i] > -0.0001) {
             jacobi_matrix[0][i] = 0;
@@ -511,6 +510,7 @@ double **jacobi(double **original_matrix, int num_of_vectors) {
     return jacobi_matrix;
 }
 
+/* implements a comparator function for qsort*/
 int sortFunc(const void *a, const void *b) {
     double val;
     val = (*(double *) a - *(double *) b);
@@ -523,11 +523,11 @@ int sortFunc(const void *a, const void *b) {
     return 0;
 }
 
-int eigengap_heuristic(double **jacobi_matrix, int num_of_vectors) { /* calculates k using the eigengap heuristic*/
-    /* if k is not provided as an argument*/
+/* calculates k using the eigengap heuristic (if k is not provided as an argument) */
+int eigengap_heuristic(double **jacobi_matrix, int num_of_vectors) {
     double *eigenvalues;
-    int i;
     double k;
+    int i;
     int index;
     k = 0;
     eigenvalues = (double *) malloc(num_of_vectors * sizeof(double));
@@ -549,8 +549,8 @@ int eigengap_heuristic(double **jacobi_matrix, int num_of_vectors) { /* calculat
     return index + 1;
 }
 
-double **calculateUmatrix(double **jacobi_matrix, int num_of_vectors, int k) { /* calculates the U matrix, returns
-     a matrix with k eigenvectors (with smallest eigenvalues) as its columns */
+/* calculates the U matrix, returns a matrix with k eigenvectors (with smallest eigenvalues) as its columns */
+double **calculateUmatrix(double **jacobi_matrix, int num_of_vectors, int k) {
     double **U;
     double *eigenvalues;
     int i;
@@ -589,16 +589,21 @@ double **calculateUmatrix(double **jacobi_matrix, int num_of_vectors, int k) { /
     return U;
 }
 
-
+/* implementation of kmeans++ */
 void kmeanspp(int num_of_clusters, int num_of_iterations, int vector_dimension, int count,
               double **vector_list, double eps, double **init_centroids) {
 
-    double **centroids;
-    int *cluster_sizes_copy;
-    double *temp_centroid;
-    int *cluster_sizes;
     double ***clusters;
+    double **centroids;
+    double *temp_centroid;
     double max_distance;
+    double min_distance1;
+    double min_distance2;
+    double distance1;
+    double distance2;
+    double sum;
+    int *cluster_sizes_copy;
+    int *cluster_sizes;
     int min_index1;
     int min_index2;
     int i;
@@ -609,11 +614,6 @@ void kmeanspp(int num_of_clusters, int num_of_iterations, int vector_dimension, 
     int k;
     int p;
     int q;
-    double min_distance1;
-    double min_distance2;
-    double distance1;
-    double distance2;
-    double sum;
 
     max_distance = -1;
     centroids = calloc(num_of_clusters, sizeof(double *));

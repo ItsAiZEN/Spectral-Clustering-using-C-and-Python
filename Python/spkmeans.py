@@ -1,20 +1,59 @@
+"""
+    This project implements the spectral clustering algorithm.
+    Most of the code is written in C in order to achieve better performance.
+    Both in C and in Python parts of the code can be run, in C there are the following functions:
+    1. wam - weighted adjacency matrix
+    2. ddg - degree diagonal matrix
+    3. gl - graph laplacian
+    4. jacobi - jacobi algorithm
+
+    In Python there are the following functions:
+    1. spkmeans - spectral k-means algorithm
+    2. all the functions from C
+
+    Files and inputs are given in the following format:
+    1. C code - the first argument is the goal (wam, ddg, gl, jacobi), the second argument is the file name
+    2. Python code - the first argument is the number of clusters (optional), second is the goal (wam, ddg, gl, jacobi, spk), third is the file name
+
+    The input file is a csv file with the following format:
+    1. each line represents a vector, each value is separated by a comma
+    2. file ends with a new line
+
+    Output for jacobi goal is a matrix with the following format:
+    1. first line is the eigenvalues
+    2. the rest of the lines are the eigenvectors (as columns)
+
+    Output for spk goal has the following format:
+    1. first line is the observation indices of the chosen vectors (k eigenvectors as columns chosen by the algorithm) for initial centroids
+    2. the rest of the lines are the centroids
+
+    all the other goals output a matrix with the following format:
+    1. each line represents a vector, each value is separated by a comma
+
+    The code was written in ANSI-C and Python 3.
+"""
+
 import math
 import sys
 import pandas as pd
 import numpy as np
 import mykmeanssp
 
-# TODO: make the code run on NOVA
+# to import mykmeanssp, have spkmeans.py, mykmeanssp.c, spkmeansmodule.c, setup.py in the same file,and run in terminal:
+# python setup.py build_ext --inplace
+# if it doesn't work, try:
+# python3 setup.py build_ext --inplace
+
 # TODO: make the code more elegant
 # TODO: final tests and documentation
 
-
+# seed set for uniformity, can be removed if needed
 np.random.seed(0)
 
 if len(sys.argv) == 3:
     goal = sys.argv[1]
     file = open(sys.argv[2], "r")
-    # k denoted from eigengap
+    # in this case k will be denoted from eigengap_heuristic
 elif len(sys.argv) == 4:
     k = int(sys.argv[1])
     goal = sys.argv[2]
@@ -23,13 +62,15 @@ else:
     print("An Error Has Occurred")
     exit()
 
+# read the csv file into a pandas dataframe
 vectors1 = pd.read_csv(file, header=None)
 vector_dimension = vectors1.shape[1]
 N = vectors1.shape[0]
 
-# transpose the matrix
+# convert the pandas dataframe into a list of lists
 vectors = vectors1.values.tolist()
 
+# checks the validity of the input
 if len(sys.argv) == 4:
     if k >= N or k <= 1:
         print("An Error Has Occurred")
@@ -37,6 +78,7 @@ if len(sys.argv) == 4:
 
 
 def euclidean_distance(vector1, vector2):
+    """calculates the euclidean distance between two vectors"""
     total_sum = 0
     for i in range(len(vector1)):
         total_sum += (vector1[i] - vector2[i]) ** 2
@@ -44,7 +86,8 @@ def euclidean_distance(vector1, vector2):
 
 
 def kmeans_pp(u_matrix1, k_dimension):
-    # make u_matrix1 a pandas dataframe
+    """performs kmeans++ algorithm"""
+    # make u_matrix a pandas dataframe
     u_matrix = pd.DataFrame(u_matrix1)
     # add a left column of indices to the dataframe
     u_matrix.insert(0, "index", range(0, len(u_matrix)))
@@ -87,7 +130,6 @@ def kmeans_pp(u_matrix1, k_dimension):
 if goal == "wam":
     wam = mykmeanssp.wam(vectors, N, vector_dimension)
     size = len(wam)
-    # print the wam matrix, seperate by commas and output with 4 decimal places
     for i in range(size):
         for j in range(size):
             print('%.4f' % wam[i][j], end="")
@@ -99,7 +141,6 @@ elif goal == "ddg":
     wam = mykmeanssp.wam(vectors, N, vector_dimension)
     ddg = mykmeanssp.ddg(wam, len(wam))
     size = len(ddg)
-    # print the ddg matrix, seperate by commas and output with 4 decimal places
     for i in range(size):
         for j in range(size):
             print('%.4f' % ddg[i][j], end="")
@@ -112,7 +153,6 @@ elif goal == "gl":
     ddg = mykmeanssp.ddg(wam, len(wam))
     gl = mykmeanssp.gl(wam, ddg, len(wam))
     size = len(gl)
-    # print the gl matrix, seperate by commas and output with 4 decimal places
     for i in range(size):
         for j in range(size):
             print('%.4f' % gl[i][j], end="")
@@ -123,7 +163,6 @@ elif goal == "gl":
 elif goal == "jacobi":
     jacobi = mykmeanssp.jacobi(vectors, N)
     size = len(jacobi) - 1
-    # print the jacobi matrix, seperate by commas and output with 4 decimal places
     for i in range(size + 1):
         for j in range(size):
             print('%.4f' % jacobi[i][j], end="")
