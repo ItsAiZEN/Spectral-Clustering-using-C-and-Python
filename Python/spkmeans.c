@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
     char *goal;
     char *file_name;
     char c;
-    int vector_dimension, vector_count, i, j;
+    int vector_dimension, vector_count, i, j, scan;
     FILE *file;
 
     vector_dimension = 0;
@@ -62,13 +62,26 @@ int main(int argc, char **argv) {
                 /* if the character is not a comma or a new line, it is a number, therefore we need to go back one character */
                 fseek(file, -1, SEEK_CUR);
             }
-            fscanf(file, "%lf", &vector_list[i][j]);
+            scan = fscanf(file, "%lf", &vector_list[i][j]);
         }
     }
     fclose(file);
 
     if (strcmp(goal, "wam") == 0) {
         returned_matrix = wam(vector_list, vector_count, vector_dimension);
+        for (i = 0; i < vector_count; i++) {
+            for (j = 0; j < vector_count; j++) {
+                if (j == vector_count - 1)
+                    printf("%.4f\n", returned_matrix[i][j]);
+                else
+                    printf("%.4f%c", returned_matrix[i][j], ',');
+            }
+        }
+        for (i = 0; i < vector_count; i++) {
+            free(returned_matrix[i]);
+        }
+        free(returned_matrix);
+    }
     } else if (strcmp(goal, "ddg") == 0) {
         wam_returned = wam(vector_list, vector_count, vector_dimension);
         returned_matrix = ddg(wam_returned, vector_count);
@@ -76,6 +89,19 @@ int main(int argc, char **argv) {
             free(wam_returned[i]);
         }
         free(wam_returned);
+        for (i = 0; i < vector_count; i++) {
+            for (j = 0; j < vector_count; j++) {
+                if (j == vector_count - 1)
+                    printf("%.4f\n", returned_matrix[i][j]);
+                else
+                    printf("%.4f%c", returned_matrix[i][j], ',');
+            }
+        }
+        for (i = 0; i < vector_count; i++) {
+            free(returned_matrix[i]);
+        }
+        free(returned_matrix);
+    }
     } else if (strcmp(goal, "gl") == 0) {
         wam_returned = wam(vector_list, vector_count, vector_dimension);
         ddg_returned = ddg(wam_returned, vector_count);
@@ -88,13 +114,21 @@ int main(int argc, char **argv) {
             free(ddg_returned[i]);
         }
         free(ddg_returned);
+        for (i = 0; i < vector_count; i++) {
+            for (j = 0; j < vector_count; j++) {
+                if (j == vector_count - 1)
+                    printf("%.4f\n", returned_matrix[i][j]);
+                else
+                    printf("%.4f%c", returned_matrix[i][j], ',');
+            }
+        }
+        for (i = 0; i < vector_count; i++) {
+            free(returned_matrix[i]);
+        }
+        free(returned_matrix);
+    }
     } else if (strcmp(goal, "jacobi") == 0) {
         returned_jacobi_matrix = jacobi(vector_list, vector_count);
-    } else {
-        print_error();
-    }
-
-    if (strcmp(goal, "jacobi") == 0) {
         for (i = 0; i < vector_count + 1; i++) {
             for (j = 0; j < vector_count; j++) {
                 if (j == vector_count - 1)
@@ -108,18 +142,7 @@ int main(int argc, char **argv) {
         }
         free(returned_jacobi_matrix);
     } else {
-        for (i = 0; i < vector_count; i++) {
-            for (j = 0; j < vector_count; j++) {
-                if (j == vector_count - 1)
-                    printf("%.4f\n", returned_matrix[i][j]);
-                else
-                    printf("%.4f%c", returned_matrix[i][j], ',');
-            }
-        }
-        for (i = 0; i < vector_count; i++) {
-            free(returned_matrix[i]);
-        }
-        free(returned_matrix);
+        print_error();
     }
 
     /*free memory*/
@@ -507,6 +530,7 @@ int eigengap_heuristic(double **jacobi_matrix, int num_of_vectors) {
     double *eigenvalues;
     double k;
     int i, index;
+    index = 0;
     k = 0;
     eigenvalues = (double *) malloc(num_of_vectors * sizeof(double));
     if (eigenvalues == NULL) {
