@@ -70,3 +70,8 @@ Python/mykmeanssp.cpython-39-darwin.so
 Python/build/temp.macosx-10.9-universal2-cpython-39/spkmeansmodule.o
 Python/build/lib.macosx-10.9-universal2-cpython-39/mykmeanssp.cpython-39-darwin.so
 Python/build/temp.macosx-10.9-universal2-cpython-39/spkmeans.o
+mykmeanssp.cpython-39-darwin.so
+build/temp.macosx-10.9-universal2-cpython-39/spkmeans.o
+build/temp.macosx-10.9-universal2-cpython-39/spkmeansmodule.o
+spkmeans
+spkmeans.o
