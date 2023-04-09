@@ -31,7 +31,7 @@ static PyObject *wam1(PyObject *self, PyObject *args) {
         print_error();
     }
     for (i = 0; i < num_of_vectors; i++) {
-        vector_list[i] = (double *) malloc(num_of_vectors * sizeof(double));
+        vector_list[i] = (double *) malloc(vector_dimension * sizeof(double));
         if (vector_list[i] == NULL) {
             print_error();
         }
