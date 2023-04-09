@@ -24,7 +24,7 @@ static PyObject *create_pyList_from_C(double **C_matrix, int num_of_rows, int nu
             print_error();
         }
         PyList_SetItem(py_matrix, i, py_matrix_row);
-        for (j = 0; j < num_of_rows; j++) {
+        for (j = 0; j < num_of_cols; j++) {
             num = PyFloat_FromDouble(C_matrix[i][j]);
             PyList_SetItem(py_matrix_row, j, num);
         }
